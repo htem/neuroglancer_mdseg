@@ -25,10 +25,10 @@ import {Neurondb} from 'neuroglancer/neurondb';
 
 
 export class ProofreadSearchTab extends Atab {
-  
+
 
   m:Map<string,HTMLElement> = new Map();
-  
+
   private dbNeuronPrefix = document.createElement('textarea');
   private dbFindAnnotator = document.createElement('textarea');
   private dbFindType = document.createElement('textarea');
@@ -46,7 +46,7 @@ export class ProofreadSearchTab extends Atab {
   private dbLoadNeuronNameButton2 = document.createElement('input');
   private dbLoadNeuronNameButton3 = document.createElement('input');
   private dbNoChildren = document.createElement('input');
-   
+
   constructor(public transform: Neurondb) {
     super(transform);
 
@@ -67,7 +67,7 @@ export class ProofreadSearchTab extends Atab {
     this.m.set("dbLoadNeuronName3",this.dbLoadNeuronName3);
     this.m.set("dbLoadNeuronNameButton3",this.dbLoadNeuronNameButton3);
     this.m.set("dbLoadWithoutChildren",this.dbNoChildren);
-    
+
     const {element} = this;
     element.classList.add('neuroglancer-Proofread-widget');
 
@@ -99,7 +99,7 @@ export class ProofreadSearchTab extends Atab {
   }
 
 
-   
+
   updateModel() {
   try
     {
@@ -109,7 +109,7 @@ export class ProofreadSearchTab extends Atab {
         if(field.nodeName == 'TEXTAREA'){
           this.transform._value[key]= (<HTMLTextAreaElement>field).value;
         }else if(field.nodeName == 'INPUT' && (<HTMLInputElement>field).type === "checkbox"){
-          
+
           if((<HTMLInputElement>field).checked){
             this.transform._value[key] = '1';
             }else{

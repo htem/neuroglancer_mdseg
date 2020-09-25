@@ -36,10 +36,10 @@ import {setDefaultInputEventBindings} from 'neuroglancer/ui/default_input_event_
 import {makeDefaultViewer} from 'neuroglancer/ui/default_viewer';
 import {UrlHashBinding} from 'neuroglancer/ui/url_hash_binding';
 import {parseFixedLengthArray, verifyInt} from 'neuroglancer/util/json';
-import {CompoundTrackable, getCachedJson, Trackable} from 'neuroglancer/util/trackable';
+import {CompoundTrackable, Trackable} from 'neuroglancer/util/trackable';
 import {InputEventBindings} from 'neuroglancer/viewer';
 
-function makeTrackableBasedEventActionMaps(inputEventBindings: InputEventBindings) {
+export function makeTrackableBasedEventActionMaps(inputEventBindings: InputEventBindings) {
   const config = new CompoundTrackable();
   const globalMap = new TrackableBasedEventActionMap();
   config.add('viewer', globalMap);
@@ -61,7 +61,7 @@ function makeTrackableBasedEventActionMaps(inputEventBindings: InputEventBinding
   return config;
 }
 
-function makeTrackableBasedSourceGenerationHandler(pythonDataSource: PythonDataSource) {
+export function makeTrackableBasedSourceGenerationHandler(pythonDataSource: PythonDataSource) {
   const state = new TrackableValue<{[key: string]: number}>({}, x => {
     for (const key of Object.keys(x)) {
       const value = x[key];
@@ -85,6 +85,9 @@ function makeTrackableBasedSourceGenerationHandler(pythonDataSource: PythonDataS
   }, 0));
   return state;
 }
+
+
+
 
 window.addEventListener('DOMContentLoaded', () => {
   const configState = new CompoundTrackable();
@@ -179,40 +182,39 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 
-  document.addEventListener('clSetVal',()=> {
-    remoteActionHandler.sendActionRequested.dispatch('set-color',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
-  });
-  document.addEventListener('clClear',()=> {
-    remoteActionHandler.sendActionRequested.dispatch('clear-color',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
-  });
-  document.addEventListener('prSomaLocCopyLoc',()=> {
-    remoteActionHandler.sendActionRequested.dispatch('prSomaLocCopyLocEvent',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
-  });
-
-  document.addEventListener('prSaveNeuron',()=> {
-    // window.alert('saved neuron');
-    // console.log('saved neuron');
-    remoteActionHandler.sendActionRequested.dispatch('save-neuron',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
-  });
-  document.addEventListener('dbLoadNeuronNameButton',()=> {
-    remoteActionHandler.sendActionRequested.dispatch('dbLoadNeuronNameButtonEvent',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
-  });
-  document.addEventListener('dbLoadNeuronNameButton1',()=> {
-    remoteActionHandler.sendActionRequested.dispatch('dbLoadNeuronNameButton1Event',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
-  });
-  document.addEventListener('dbLoadNeuronNameButton2',()=> {
-    remoteActionHandler.sendActionRequested.dispatch('dbLoadNeuronNameButton2Event',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
-  });
-  document.addEventListener('dbLoadNeuronNameButton3',()=> {
-    remoteActionHandler.sendActionRequested.dispatch('dbLoadNeuronNameButton3Event',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
-  });
-  document.addEventListener('dbSearchButton',()=> {
-    remoteActionHandler.sendActionRequested.dispatch('search-neuron',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
-  });
-  document.addEventListener('clNeuronColorButton',()=> {
-    remoteActionHandler.sendActionRequested.dispatch('clNeuronColorButton',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
-  });
-
+  // document.addEventListener('clSetVal',()=> {
+  //   remoteActionHandler.sendActionRequested.dispatch('set-color',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  // });
+  // document.addEventListener('clClear',()=> {
+  //   remoteActionHandler.sendActionRequested.dispatch('clear-color',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  // });
+  // document.addEventListener('prSomaLocCopyLoc',()=> {
+  //   remoteActionHandler.sendActionRequested.dispatch('prSomaLocCopyLocEvent',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  // });
+  //
+  // document.addEventListener('click',()=> {
+  //   window.alert('saved neuron');
+  //   // console.log('saved neuron');
+  //   // remoteActionHandler.sendActionRequested.dispatch('save-neuron',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  // });
+  // document.addEventListener('dbLoadNeuronNameButton',()=> {
+  //   remoteActionHandler.sendActionRequested.dispatch('dbLoadNeuronNameButtonEvent',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  // });
+  // document.addEventListener('dbLoadNeuronNameButton1',()=> {
+  //   remoteActionHandler.sendActionRequested.dispatch('dbLoadNeuronNameButton1Event',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  // });
+  // document.addEventListener('dbLoadNeuronNameButton2',()=> {
+  //   remoteActionHandler.sendActionRequested.dispatch('dbLoadNeuronNameButton2Event',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  // });
+  // document.addEventListener('dbLoadNeuronNameButton3',()=> {
+  //   remoteActionHandler.sendActionRequested.dispatch('dbLoadNeuronNameButton3Event',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  // });
+  // document.addEventListener('dbSearchButton',()=> {
+  //   remoteActionHandler.sendActionRequested.dispatch('search-neuron',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  // });
+  // document.addEventListener('clNeuronColorButton',()=> {
+  //   remoteActionHandler.sendActionRequested.dispatch('clNeuronColorButton',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  // });
 
 
 
@@ -220,3 +222,30 @@ window.addEventListener('DOMContentLoaded', () => {
   bindDefaultCopyHandler(viewer);
   bindDefaultPasteHandler(viewer);
 });
+
+//
+// window.addEventListener('DOMContentLoaded', () => {
+//   window.alert('hi');
+// });
+//
+//
+// export function test() {
+//   window.alert('hi');
+// //   document.addEventListener('prSaveNeuron', () => {
+// //     window.alert('save click');
+// //   // document.addEventListener('click',()=> {
+// //   //     window.alert('saved neuron new func');
+// //   //     // console.log('saved neuron');
+// //   //     // remoteActionHandler.sendActionRequested.dispatch('save-neuron',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+// //   //   });
+// // });
+// }
+
+// window.addEventListener('DOMContentLoaded', () => {
+//   window.alert('dom loaded');
+//   // document.addEventListener('click',()=> {
+//   //     window.alert('saved neuron new func');
+//   //     // console.log('saved neuron');
+//   //     // remoteActionHandler.sendActionRequested.dispatch('save-neuron',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+//   //   });
+// });

@@ -19,12 +19,18 @@
  */
 
 import './coordinate_transform.css';
-import {SegmentationUserLayer} from 'neuroglancer/segmentation_user_layer';
-import {Tab} from 'neuroglancer/widget/tab_view';
+// import {SegmentationUserLayer} from 'neuroglancer/segmentation_user_layer';
+// import {Tab} from 'neuroglancer/widget/tab_view';
 import {Atab} from 'neuroglancer/ui/AbstractTab';
 import {Proofread} from 'neuroglancer/proofread';
-
-type titleType = 'H3' | 'label';
+// import {getCachedJson} from 'neuroglancer/util/trackable';
+// import {RemoteActionHandler} from 'neuroglancer/python_integration/remote_actions';
+// import {makeDefaultViewer} from 'neuroglancer/ui/default_viewer';
+// import {getDefaultDataSourceProvider} from 'neuroglancer/datasource/default_provider';
+// import {CachingCredentialsManager} from 'neuroglancer/credentials_provider';
+// import {TrackableBasedCredentialsManager} from 'neuroglancer/python_integration/credentials_provider';
+//
+// type titleType = 'H3' | 'label';
 
 
 export class ProofreadTab extends Atab {
@@ -95,7 +101,18 @@ export class ProofreadTab extends Atab {
     this.addInputElement(this.prSaveNeuron, 'Save Neuron', 'button', 'prSaveNeuron');
 
 
-    // this.prSaveNeuron.addEventListener('click', () => {
+    // const credentialsManager = new TrackableBasedCredentialsManager();
+    // const dataSourceProvider = getDefaultDataSourceProvider(
+    //     {credentialsManager: new CachingCredentialsManager(credentialsManager)});
+    // let viewer = (<any>window)['viewer'] = makeDefaultViewer({
+    //   showLayerDialog: false,
+    //   resetStateWhenEmpty: false,
+    //   dataSourceProvider,
+    // });
+    // const remoteActionHandler = new RemoteActionHandler(viewer);
+    // document.addEventListener('click', () => {
+    //     //   remoteActionHandler.sendActionRequested.dispatch('save-neuron',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+    //     // }
     //   window.alert('test for save button');}
     // );
 

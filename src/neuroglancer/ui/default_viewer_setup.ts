@@ -19,6 +19,8 @@ import {bindDefaultCopyHandler, bindDefaultPasteHandler} from 'neuroglancer/ui/d
 import {setDefaultInputEventBindings} from 'neuroglancer/ui/default_input_event_bindings';
 import {makeDefaultViewer} from 'neuroglancer/ui/default_viewer';
 import {UrlHashBinding} from 'neuroglancer/ui/url_hash_binding';
+import {RemoteActionHandler} from 'neuroglancer/python_integration/remote_actions';
+import {CompoundTrackable, getCachedJson} from 'neuroglancer/util/trackable';
 
 /**
  * Sets up the default neuroglancer viewer.
@@ -41,6 +43,20 @@ export function setupDefaultViewer() {
 
   bindDefaultCopyHandler(viewer);
   bindDefaultPasteHandler(viewer);
+
+  const configState = new CompoundTrackable();
+  const remoteActionHandler = new RemoteActionHandler(viewer);
+  (<any>window)['remoteActionHandler'] = remoteActionHandler;
+  configState.add('actions', remoteActionHandler.actionSet);
+
+
+  document.addEventListener('prSaveNeuron', () => {
+      remoteActionHandler.sendActionRequested.dispatch('save-neuron',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+      window.alert('save neuron');
+  });
+  document.addEventListener('prSomaLocCopyLoc',()=> {
+    remoteActionHandler.sendActionRequested.dispatch('prSomaLocCopyLocEvent',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  });
 
   return viewer;
 }

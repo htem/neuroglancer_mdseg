@@ -67,6 +67,8 @@ import {ProofreadTab} from 'neuroglancer/widget/proofread_tab';
 import {Proofread} from 'neuroglancer/proofread';
 import {ColorTab} from 'neuroglancer/widget/ColorTab';
 import {ProofreadSearchTab} from 'neuroglancer/widget/proofread_search_tab';
+import {Color} from 'neuroglancer/color';
+import {Neurondb} from 'neuroglancer/neurondb';
 
 const SELECTED_ALPHA_JSON_KEY = 'selectedAlpha';
 const NOT_SELECTED_ALPHA_JSON_KEY = 'notSelectedAlpha';
@@ -92,6 +94,9 @@ const maxSilhouettePower = 10;
 
 const tempUint64 = new Uint64();
 
+const prModel = new Proofread();
+const colorModel = new Color();
+const searchModel = new Neurondb();
 const Base = UserLayerWithAnnotationsMixin(UserLayer);
 export class SegmentationUserLayer extends Base {
   sliceViewRenderScaleHistogram = new RenderScaleHistogram();
@@ -178,11 +183,11 @@ export class SegmentationUserLayer extends Base {
     this.tabs.add(
         'segments', {label: 'Seg.', order: -50, getter: () => new SegmentDisplayTab(this)});
     this.tabs.add(
-        'proofread', {label: 'Proofread', order: 20, getter: () => new ProofreadTab(this)});
+        'proofread', {label: 'Proofread', order: 20, getter: () => new ProofreadTab(prModel)});
     this.tabs.add(
-        'colors', {label: 'Colors', order: 10, getter: () => new ColorTab(this)});
+        'colors', {label: 'Colors', order: 10, getter: () => new ColorTab(colorModel)});
     this.tabs.add(
-        'searchDb', {label: 'Search DB', order: 30, getter: () => new ProofreadSearchTab(this)});
+        'searchDb', {label: 'Search DB', order: 30, getter: () => new ProofreadSearchTab(searchModel)});
     this.tabs.default = 'rendering';
   }
 
