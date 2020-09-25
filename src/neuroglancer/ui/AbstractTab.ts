@@ -6,11 +6,11 @@ import {Tab} from 'neuroglancer/widget/tab_view';
 type titleType = 'H3' | 'label';
 type buttonType = 'checkbox'|'button';
 
-export interface IValue{
-  [details: string] : string;
+export interface IValue {
+  [details: string]: string;
 }
 
-export abstract class Atab extends Tab{
+export abstract class Atab extends Tab {
 
     m:Map<string,HTMLElement> = new Map();
 
@@ -18,7 +18,7 @@ export abstract class Atab extends Tab{
         super();
     }
 
- addInputElement(inp:HTMLInputElement,title:string,type:buttonType = 'checkbox',id?:string){
+ addInputElement(inp:HTMLInputElement,title:string,type:buttonType = 'checkbox',id?:string) {
     const linebreak = document.createElement('br');
     const input = inp;
     const div_inpArea = document.createElement('DIV');
@@ -88,28 +88,28 @@ export abstract class Atab extends Tab{
 
 
  public abstract updateModel():void ;
- //public abstract updateView():void;
+ // public abstract updateView():void;
 
-getKeyByValue(object:Map<string, HTMLElement>, value:HTMLElement) 
-     {return Object.keys(object).find(key => object.get(key) === value)};
+getKeyByValue(object:Map<string, HTMLElement>, value:HTMLElement) {
+  return Object.keys(object).find(key => object.get(key) === value);
+}
 
 updateView() {
-    for (let key in this.model.value)
-    {
+    for (let key in this.model.value) {
       let field = this.m.get(key)!;
       let txt: string = this.model.value[key];
-      if (field.nodeName == 'TEXTAREA'){
+      if (field.nodeName === 'TEXTAREA') {
         (<HTMLTextAreaElement>field).value = ''+txt;
-      }else if( field.nodeName == 'INPUT'){
-        if(JSON.parse(txt)=="1"){
+      } else if( field.nodeName === 'INPUT') {
+        if(JSON.parse(txt) === '1') {
         (<HTMLInputElement>field).checked = true;
-        }else {
+        } else {
         (<HTMLInputElement>field).checked = false;
         }
       }
-    }  
+    }
   }
-  
+
 
 
 }
