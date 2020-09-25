@@ -57,7 +57,7 @@ export function setupDefaultViewer() {
   document.addEventListener('prSomaLocCopyLoc',()=> {
     remoteActionHandler.sendActionRequested.dispatch('prSomaLocCopyLocEvent',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
   });
-  document.addEventListener('click',()=> {
+  document.addEventListener('prSaveNeuron',()=> {
     remoteActionHandler.sendActionRequested.dispatch('save-neuron',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
   });
   document.addEventListener('dbLoadNeuronNameButton',()=> {
