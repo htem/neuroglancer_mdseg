@@ -24,16 +24,16 @@ import {NullarySignal} from 'neuroglancer/util/signal';
  * Typically it represents a transform from a local coordinate space to a global coordinate space.
  */
 
-export interface IValue{
-  [details: string] : string;
+export interface IValue {
+  [details: string]: string;
 }
 
-export class Proofread implements WatchableValueInterface<IValue>{
+export class Proofread implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
   
   _value: IValue;
 
-  constructor(){
+  constructor() {
     //maybe you can add to same dictionary instead of array of dictionary
     let textArea: IValue ={};
     textArea["prNeuronName"]= "";
@@ -63,11 +63,11 @@ export class Proofread implements WatchableValueInterface<IValue>{
    * Resets to the .
    */
   reset() {
-   let textArea: IValue ={};
+   let textArea: IValue = {};
    textArea["prNeuronName"]= "";
-    textArea["prCellType"]="";
+   textArea["prCellType"]="";
     textArea["prTags"]="";
-    textArea["prLocTags"]="";
+   textArea["prLocTags"]="";
     textArea["prUncertainCon"]="";
     textArea["prMergers"]="";
     textArea["prAnnotator"]="";
@@ -99,12 +99,11 @@ export class Proofread implements WatchableValueInterface<IValue>{
       return;
     }
     
-    try{
+    try {
       this._value = x;
       this.changed.dispatch();
-    }catch(ignoredError){
+    } catch(ignoredError) {
       this.reset();
     }
-    
   }
 }
