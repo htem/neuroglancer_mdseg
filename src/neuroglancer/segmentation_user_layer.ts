@@ -63,12 +63,6 @@ import {ShaderCodeWidget} from 'neuroglancer/widget/shader_code_widget';
 import {ShaderControls} from 'neuroglancer/widget/shader_controls';
 import {Tab} from 'neuroglancer/widget/tab_view';
 import {VirtualList, VirtualListSource} from 'neuroglancer/widget/virtual_list';
-import {ProofreadTab} from 'neuroglancer/widget/proofread_tab';
-import {Proofread} from 'neuroglancer/proofread';
-import {ColorTab} from 'neuroglancer/widget/ColorTab';
-import {ProofreadSearchTab} from 'neuroglancer/widget/proofread_search_tab';
-import {Color} from 'neuroglancer/color';
-import {Neurondb} from 'neuroglancer/neurondb';
 import {UserLayerWithColorMixin} from 'neuroglancer/user_layer_with_color';
 import {UserLayerWithNeurondbMixin} from 'neuroglancer/user_layer_with_neuron_db_search';
 import {UserLayerWithProofreadMixin} from 'neuroglancer/user_layer_with_proofread';
@@ -182,12 +176,6 @@ export class SegmentationUserLayer extends Base {
         'rendering', {label: 'Render', order: -100, getter: () => new DisplayOptionsTab(this)});
     this.tabs.add(
         'segments', {label: 'Seg.', order: -50, getter: () => new SegmentDisplayTab(this)});
-    // this.tabs.add(
-    //     'proofread', {label: 'Proofread', order: 20, getter: () => new ProofreadTab(prModel)});
-    // this.tabs.add(
-    //     'colors', {label: 'Colors', order: 10, getter: () => new ColorTab(colorModel)});
-    // this.tabs.add(
-    //     'searchDb', {label: 'Search DB', order: 30, getter: () => new ProofreadSearchTab(searchModel)});
     this.tabs.default = 'rendering';
   }
 
