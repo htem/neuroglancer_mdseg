@@ -36,7 +36,7 @@ import {setDefaultInputEventBindings} from 'neuroglancer/ui/default_input_event_
 import {makeDefaultViewer} from 'neuroglancer/ui/default_viewer';
 import {UrlHashBinding} from 'neuroglancer/ui/url_hash_binding';
 import {parseFixedLengthArray, verifyInt} from 'neuroglancer/util/json';
-import {CompoundTrackable, Trackable} from 'neuroglancer/util/trackable';
+import {CompoundTrackable, getCachedJson, Trackable} from 'neuroglancer/util/trackable';
 import {InputEventBindings} from 'neuroglancer/viewer';
 
 export function makeTrackableBasedEventActionMaps(inputEventBindings: InputEventBindings) {
@@ -177,7 +177,36 @@ window.addEventListener('DOMContentLoaded', () => {
   screenshotHandler.sendScreenshotRequested.add(
       state => serverConnection.sendActionNotification('screenshot', state));
 
-
+  document.addEventListener('clSetVal',()=> {
+    remoteActionHandler.sendActionRequested.dispatch('set-color',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  });
+  document.addEventListener('clClear',()=> {
+    remoteActionHandler.sendActionRequested.dispatch('clear-color',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  });
+  document.addEventListener('prSomaLocCopyLoc',()=> {
+    remoteActionHandler.sendActionRequested.dispatch('prSomaLocCopyLocEvent',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  });
+  document.addEventListener('prSaveNeuron',()=> {
+    remoteActionHandler.sendActionRequested.dispatch('save-neuron',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  });
+  document.addEventListener('dbLoadNeuronNameButton',()=> {
+    remoteActionHandler.sendActionRequested.dispatch('dbLoadNeuronNameButtonEvent',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  });
+  document.addEventListener('dbLoadNeuronNameButton1',()=> {
+    remoteActionHandler.sendActionRequested.dispatch('dbLoadNeuronNameButton1Event',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  });
+  document.addEventListener('dbLoadNeuronNameButton2',()=> {
+    remoteActionHandler.sendActionRequested.dispatch('dbLoadNeuronNameButton2Event',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  });
+  document.addEventListener('dbLoadNeuronNameButton3',()=> {
+    remoteActionHandler.sendActionRequested.dispatch('dbLoadNeuronNameButton3Event',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  });
+  document.addEventListener('dbSearchButton',()=> {
+    remoteActionHandler.sendActionRequested.dispatch('search-neuron',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  });
+  document.addEventListener('clNeuronColorButton',()=> {
+    remoteActionHandler.sendActionRequested.dispatch('clNeuronColorButton',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
+  });
   bindDefaultCopyHandler(viewer);
   bindDefaultPasteHandler(viewer);
 });
