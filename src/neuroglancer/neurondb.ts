@@ -76,12 +76,6 @@ export class Neurondb implements WatchableValueInterface<IValue> {
   }
 
   toJSON() {
-    /*for(let x of this._value){
-      for(let key in x){
-        let value = x[key];
-        ;
-      }
-    }*/
     let result: IValue = {};
     for(let key in this._value) {
       let label = key;
@@ -89,12 +83,8 @@ export class Neurondb implements WatchableValueInterface<IValue> {
       if(value !== '') {
         result[label] = value;
       }
-      // if((value !== '' && value === '1') || value !== '') {
-      //   result[label] = value;
-      // }
     }
     return result;
-    // return this._value;
   }
 
   restoreState(x: IValue) {
