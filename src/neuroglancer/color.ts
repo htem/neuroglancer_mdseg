@@ -24,22 +24,22 @@ import {NullarySignal} from 'neuroglancer/util/signal';
  * Typically it represents a transform from a local coordinate space to a global coordinate space.
  */
 
-export interface IValue{
-  [details: string] : string;
+export interface IValue {
+  [details: string]: string;
 }
 
-export class Color implements WatchableValueInterface<IValue>{
+export class Color implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
-  
+
   _value: IValue;
 
-  constructor(){
-    //maybe you can add to same dictionary instead of array of dictionary
-    let textArea: IValue ={};
-    textArea["set_color_val"]="";
-    textArea["clNeuronColor"]="";
-    textArea["clAlsoLoadNeurons"]="0";
-    textArea["clClearBeforeLoad"]="0";
+  constructor() {
+    // maybe you can add to same dictionary instead of array of dictionary
+    let textArea: IValue = {};
+    textArea['set_color_val']='';
+    textArea['clNeuronColor']='';
+    textArea['clAlsoLoadNeurons']='0';
+    textArea['clClearBeforeLoad']='0';
 
     this._value =textArea;
   }
@@ -49,18 +49,29 @@ export class Color implements WatchableValueInterface<IValue>{
   }
 
   reset() {
-   let empty: IValue ={};
-   
-    empty["set_color_val"]="";
-    empty["clNeuronColor"]="";
-    empty["clAlsoLoadNeurons"]="0";
-    empty["clClearBeforeLoad"]="0";
+   let empty: IValue = {};
+
+   empty['set_color_val']='';
+   empty['clNeuronColor']='';
+   empty['clAlsoLoadNeurons']='0';
+   empty['clClearBeforeLoad']='0';
    this._value = empty;
    this.changed.dispatch();
   }
 
   toJSON() {
-    return this._value;
+    let result: IValue = {};
+    for(let key in this._value) {
+      let label = key;
+      let value = this._value[key];
+      if(value !== '') {
+        result[label] = value;
+      }
+      // if((value !== '' && value === '1') || value !== '') {
+      //   result[label] = value;
+      // }
+    }
+    return result;
   }
 
   restoreState(x: IValue) {
@@ -68,13 +79,13 @@ export class Color implements WatchableValueInterface<IValue>{
       this.reset();
       return;
     }
-    
-    try{
+
+    try {
       this._value = x;
       this.changed.dispatch();
-    }catch(ignoredError){
+    } catch(ignoredError) {
       this.reset();
     }
-    
+
   }
 }

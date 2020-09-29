@@ -30,27 +30,27 @@ export interface IValue {
 
 export class Proofread implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
-  
+
   _value: IValue;
 
   constructor() {
-    //maybe you can add to same dictionary instead of array of dictionary
-    let textArea: IValue ={};
-    textArea["prNeuronName"]= "";
-    textArea["prCellType"]="";
-    textArea["prTags"]="";
-    textArea["prLocTags"]="";
-    textArea["prUncertainCon"]="";
-    textArea["prMergers"]="";
-    textArea["prAnnotator"]="";
-    textArea["prNotes"]="";
-    textArea["prFinished"]="false";
-    textArea["prReviewed"]="false";
-    textArea["prSomaLoc"]="";
-    textArea["prOverrideSuperSetCheck"]="false";
-    textArea["prOverrideConflictCheck"]="false";
-    textArea["prGrowThreshold"]="";
-    textArea["prSuperGrowThreshold"]="";
+    // maybe you can add to same dictionary instead of array of dictionary
+    let textArea: IValue = {};
+    textArea['prNeuronName']= '';
+    textArea['prCellType']='';
+    textArea['prTags']='';
+    textArea['prLocTags']='';
+    textArea['prUncertainCon']='';
+    textArea['prMergers']='';
+    textArea['prAnnotator']='';
+    textArea['prNotes']='';
+    textArea['prFinished']='0';
+    textArea['prReviewed']='0';
+    textArea['prSomaLoc']='';
+    textArea['prOverrideSuperSetCheck']='0';
+    textArea['prOverrideConflictCheck']='0';
+    textArea['prGrowThreshold']='';
+    textArea['prSuperGrowThreshold']='';
 
     this._value =textArea;
   }
@@ -64,21 +64,21 @@ export class Proofread implements WatchableValueInterface<IValue> {
    */
   reset() {
    let textArea: IValue = {};
-   textArea["prNeuronName"]= "";
-   textArea["prCellType"]="";
-    textArea["prTags"]="";
-   textArea["prLocTags"]="";
-    textArea["prUncertainCon"]="";
-    textArea["prMergers"]="";
-    textArea["prAnnotator"]="";
-    textArea["prNotes"]="";
-    textArea["prFinished"]="false";
-    textArea["prReviewed"]="false";
-    textArea["prSomaLoc"]="";
-    textArea["prOverrideSuperSetCheck"]="false";
-    textArea["prOverrideConflictCheck"]="false";
-    textArea["prGrowThreshold"]="";
-    textArea["prSuperGrowThreshold"]="";
+   textArea['prNeuronName']= '';
+   textArea['prCellType']='';
+   textArea['prTags']='';
+   textArea['prLocTags']='';
+   textArea['prUncertainCon']='';
+   textArea['prMergers']='';
+   textArea['prAnnotator']='';
+   textArea['prNotes']='';
+   textArea['prFinished']='0';
+   textArea['prReviewed']='0';
+   textArea['prSomaLoc']='';
+   textArea['prOverrideSuperSetCheck']='0';
+   textArea['prOverrideConflictCheck']='0';
+   textArea['prGrowThreshold']='';
+   textArea['prSuperGrowThreshold']='';
    this._value = textArea;
    this.changed.dispatch();
   }
@@ -90,7 +90,19 @@ export class Proofread implements WatchableValueInterface<IValue> {
         ;
       }
     }*/
-    return this._value;
+    let result: IValue = {};
+    for(let key in this._value) {
+      let label = key;
+      let value = this._value[key];
+      if(value !== '') {
+        result[label] = value;
+      }
+      // if((value !== '' && value === '1') || value !== '') {
+      //   result[label] = value;
+      // }
+    }
+    return result;
+    // return this._value;
   }
 
   restoreState(x: IValue) {
@@ -98,7 +110,7 @@ export class Proofread implements WatchableValueInterface<IValue> {
       this.reset();
       return;
     }
-    
+
     try {
       this._value = x;
       this.changed.dispatch();

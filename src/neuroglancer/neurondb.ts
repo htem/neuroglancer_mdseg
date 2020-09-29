@@ -24,28 +24,28 @@ import {NullarySignal} from 'neuroglancer/util/signal';
  * Typically it represents a transform from a local coordinate space to a global coordinate space.
  */
 
-export interface IValue{
-  [details: string] : string;
+export interface IValue {
+  [details: string]: string;
 }
 
-export class Neurondb implements WatchableValueInterface<IValue>{
+export class Neurondb implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
   _value: IValue;
-  constructor(){
-    //maybe you can add to same dictionary instead of array of dictionary
-    let textArea: IValue ={};
-    textArea["dbNeuronPrefix"]= "";
-    textArea["dbFindAnnotator"]="";
-    textArea["dbFindType"]="";
-    textArea["dbFindTags"]="";
-    textArea["dbFindFinished"]="0";
-    textArea["dbFindReviewed"]="0";
-    textArea["dbFindResult"]="";
-    textArea["dbLoadNeuronName"]="";
-    textArea["dbLoadNeuronName1"]="";
-    textArea["dbLoadNeuronName2"]="";
-    textArea["dbLoadNeuronName3"]="";
-    textArea["dbLoadWithoutChildren"]="0";
+  constructor() {
+    // maybe you can add to same dictionary instead of array of dictionary
+    let textArea: IValue = {};
+    textArea['dbNeuronPrefix']= '';
+    textArea['dbFindAnnotator']='';
+    textArea['dbFindType']='';
+    textArea['dbFindTags']='';
+    textArea['dbFindFinished']='0';
+    textArea['dbFindReviewed']='0';
+    textArea['dbFindResult']='';
+    textArea['dbLoadNeuronName']='';
+    textArea['dbLoadNeuronName1']='';
+    textArea['dbLoadNeuronName2']='';
+    textArea['dbLoadNeuronName3']='';
+    textArea['dbLoadWithoutChildren']='0';
 
     this._value =textArea;
   }
@@ -58,19 +58,19 @@ export class Neurondb implements WatchableValueInterface<IValue>{
    * Resets to the .
    */
   reset() {
-   let textArea: IValue ={};
-    textArea["dbNeuronPrefix"]= "";
-    textArea["dbFindAnnotator"]="";
-    textArea["dbFindType"]="";
-    textArea["dbFindTags"]="";
-    textArea["dbFindFinished"]="0";
-    textArea["dbFindReviewed"]="0";
-    textArea["dbFindResult"]="";
-    textArea["dbLoadNeuronName"]="";
-    textArea["dbLoadNeuronName1"]="";
-    textArea["dbLoadNeuronName2"]="";
-    textArea["dbLoadNeuronName3"]="";
-    textArea["dbLoadWithoutChildren"]="0";
+   let textArea: IValue = {};
+   textArea['dbNeuronPrefix']= '';
+   textArea['dbFindAnnotator']='';
+   textArea['dbFindType']='';
+   textArea['dbFindTags']='';
+   textArea['dbFindFinished']='0';
+   textArea['dbFindReviewed']='0';
+   textArea['dbFindResult']='';
+   textArea['dbLoadNeuronName']='';
+   textArea['dbLoadNeuronName1']='';
+   textArea['dbLoadNeuronName2']='';
+   textArea['dbLoadNeuronName3']='';
+   textArea['dbLoadWithoutChildren']='0';
    this._value = textArea;
    this.changed.dispatch();
   }
@@ -82,7 +82,19 @@ export class Neurondb implements WatchableValueInterface<IValue>{
         ;
       }
     }*/
-    return this._value;
+    let result: IValue = {};
+    for(let key in this._value) {
+      let label = key;
+      let value = this._value[key];
+      if(value !== '') {
+        result[label] = value;
+      }
+      // if((value !== '' && value === '1') || value !== '') {
+      //   result[label] = value;
+      // }
+    }
+    return result;
+    // return this._value;
   }
 
   restoreState(x: IValue) {
@@ -90,12 +102,12 @@ export class Neurondb implements WatchableValueInterface<IValue>{
       this.reset();
       return;
     }
-    try{
+    try {
       this._value = x;
       this.changed.dispatch();
-    }catch(ignoredError){
+    } catch(ignoredError) {
       this.reset();
     }
-    
+
   }
 }
