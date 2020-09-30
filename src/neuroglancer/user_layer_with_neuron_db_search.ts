@@ -31,7 +31,7 @@ export interface UserLayerWithNeurondb extends UserLayer {
 export function UserLayerWithNeurondbMixin<TBase extends {new (...args: any[]): UserLayer}>(
     Base: TBase) {
   class C extends Base implements UserLayerWithNeurondb {
-    sr = new Neurondb;
+    sr = new Neurondb();
 
     constructor(...args: any[]) {
       super(...args);

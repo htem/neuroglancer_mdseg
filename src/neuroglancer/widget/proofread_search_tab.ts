@@ -50,23 +50,23 @@ export class ProofreadSearchTab extends Atab {
   constructor(public transform: Neurondb) {
     super(transform);
 
-    this.m.set("dbNeuronPrefix",this.dbNeuronPrefix);
-    this.m.set("dbFindAnnotator",this.dbFindAnnotator);
-    this.m.set("dbFindType",this.dbFindType);
-    this.m.set("dbFindTags",this.dbFindTags);
-    this.m.set("dbFindFinished",this.dbFindFinished);
-    this.m.set("dbFindReviewed",this.dbFindReviewed);
-    this.m.set("dbFindResult",this.dbFindResult);
-    this.m.set("dbSearchButton",this.dbSearchButton);
-    this.m.set("dbLoadNeuronName",this.dbLoadNeuronName);
-    this.m.set("dbLoadNeuronNameButton",this.dbLoadNeuronNameButton);
-    this.m.set("dbLoadNeuronName1",this.dbLoadNeuronName1);
-    this.m.set("dbLoadNeuronNameButton1",this.dbLoadNeuronNameButton1);
-    this.m.set("dbLoadNeuronName2",this.dbLoadNeuronName2);
-    this.m.set("dbLoadNeuronNameButton2",this.dbLoadNeuronNameButton2);
-    this.m.set("dbLoadNeuronName3",this.dbLoadNeuronName3);
-    this.m.set("dbLoadNeuronNameButton3",this.dbLoadNeuronNameButton3);
-    this.m.set("dbLoadWithoutChildren",this.dbNoChildren);
+    this.m.set('dbNeuronPrefix',this.dbNeuronPrefix);
+    this.m.set('dbFindAnnotator',this.dbFindAnnotator);
+    this.m.set('dbFindType',this.dbFindType);
+    this.m.set('dbFindTags',this.dbFindTags);
+    this.m.set('dbFindFinished',this.dbFindFinished);
+    this.m.set('dbFindReviewed',this.dbFindReviewed);
+    this.m.set('dbFindResult',this.dbFindResult);
+    this.m.set('dbSearchButton',this.dbSearchButton);
+    this.m.set('dbLoadNeuronName',this.dbLoadNeuronName);
+    this.m.set('dbLoadNeuronNameButton',this.dbLoadNeuronNameButton);
+    this.m.set('dbLoadNeuronName1',this.dbLoadNeuronName1);
+    this.m.set('dbLoadNeuronNameButton1',this.dbLoadNeuronNameButton1);
+    this.m.set('dbLoadNeuronName2',this.dbLoadNeuronName2);
+    this.m.set('dbLoadNeuronNameButton2',this.dbLoadNeuronNameButton2);
+    this.m.set('dbLoadNeuronName3',this.dbLoadNeuronName3);
+    this.m.set('dbLoadNeuronNameButton3',this.dbLoadNeuronNameButton3);
+    this.m.set('dbLoadWithoutChildren',this.dbNoChildren);
 
     const {element} = this;
     element.classList.add('neuroglancer-Proofread-widget');
@@ -101,24 +101,23 @@ export class ProofreadSearchTab extends Atab {
 
 
   updateModel() {
-  try
-    {
-      for (let key in this.transform._value){
+  try {
+      for (let key in this.transform._value) {
         let field = this.m.get(key)!;
         field.id = key;
-        if(field.nodeName == 'TEXTAREA'){
+        if(field.nodeName === 'TEXTAREA') {
           this.transform._value[key]= (<HTMLTextAreaElement>field).value;
-        }else if(field.nodeName == 'INPUT' && (<HTMLInputElement>field).type === "checkbox"){
+        } else if(field.nodeName === 'INPUT' && (<HTMLInputElement>field).type === 'checkbox') {
 
-          if((<HTMLInputElement>field).checked){
+          if((<HTMLInputElement>field).checked) {
             this.transform._value[key] = '1';
-            }else{
+            } else {
             this.transform._value[key] = '0';
             }
         }
       }
       this.transform.changed.dispatch();
-    }catch{
+    } catch {
       this.updateView();
     }
   }

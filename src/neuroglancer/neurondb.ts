@@ -76,6 +76,22 @@ export class Neurondb implements WatchableValueInterface<IValue> {
   }
 
   toJSON() {
+    // let result = this._value;
+    // for(let key in this._value) {
+    //   let label = key;
+    //   let value = result[key];
+    //   if((label === 'dbFindFinished' && value === '0') ||
+    //       (label === 'dbFindReviewed' && value === '0') ||
+    //       (label === 'dbLoadWithoutChildren' && value === '0')) {
+    //     delete result[label];
+    //   }
+    //   if(value === '' &&
+    //       label !== 'dbFindFinished' &&
+    //       label !== 'dbFindReviewed' &&
+    //       label !== 'dbLoadWithoutChildren') {
+    //     delete result[label];
+    //   }
+    // }
     let result: IValue = {};
     for(let key in this._value) {
       let label = key;
