@@ -109,6 +109,7 @@ export class Neurondb implements WatchableValueInterface<IValue> {
     //   }
     // }
     // return result;
+    // this.changed.dispatch; //////////////////////////////////
     return this._value;
   }
 

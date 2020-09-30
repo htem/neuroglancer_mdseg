@@ -117,6 +117,7 @@ export class ProofreadSearchTab extends Atab {
         }
       }
       this.transform.changed.dispatch();
+      this.updateView();
     } catch {
       this.updateView();
     }
