@@ -64,14 +64,18 @@ export class Color implements WatchableValueInterface<IValue> {
     for(let key in this._value) {
       let label = key;
       let value = this._value[key];
-      if(value !== '') {
+      if((label === 'clAlsoLoadNeurons' && value === '1') ||
+          (label === 'clClearBeforeLoad' && value === '1')) {
         result[label] = value;
       }
-      // if((value !== '' && value === '1') || value !== '') {
-      //   result[label] = value;
-      // }
+      if(value !== '' &&
+          label !== 'clAlsoLoadNeurons' &&
+          label !== 'clClearBeforeLoad') {
+        result[label] = value;
+      }
     }
     return result;
+    // return this._value;
   }
 
   restoreState(x: IValue) {

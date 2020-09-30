@@ -80,11 +80,20 @@ export class Neurondb implements WatchableValueInterface<IValue> {
     for(let key in this._value) {
       let label = key;
       let value = this._value[key];
-      if(value !== '') {
+      if((label === 'dbFindFinished' && value === '1') ||
+          (label === 'dbFindReviewed' && value === '1') ||
+          (label === 'dbLoadWithoutChildren' && value === '1')) {
+        result[label] = value;
+      }
+      if(value !== '' &&
+          label !== 'dbFindFinished' &&
+          label !== 'dbFindReviewed' &&
+          label !== 'dbLoadWithoutChildren') {
         result[label] = value;
       }
     }
     return result;
+    // return this._value;
   }
 
   restoreState(x: IValue) {

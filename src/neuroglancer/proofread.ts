@@ -88,11 +88,22 @@ export class Proofread implements WatchableValueInterface<IValue> {
     for(let key in this._value) {
       let label = key;
       let value = this._value[key];
-      if(value !== '') {
+      if((label === 'prFinished' && value === '1') ||
+          (label === 'prReviewed' && value === '1') ||
+          (label === 'prOverrideSuperSetCheck' && value === '1') ||
+          (label === 'prOverrideConflictCheck' && value === '1')) {
+        result[label] = value;
+      }
+      if(value !== '' &&
+          label !== 'prFinished' &&
+          label !== 'prReviewed' &&
+          label !== 'prOverrideSuperSetCheck' &&
+          label !== 'prOverrideConflictCheck') {
         result[label] = value;
       }
     }
     return result;
+    // return this._value;
   }
 
   restoreState(x: IValue) {
