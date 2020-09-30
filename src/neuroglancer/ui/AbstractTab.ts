@@ -52,8 +52,8 @@ export abstract class Atab extends Tab {
       });
     } else {
       input.addEventListener('change',() => {
-        // this.updateModel();
-        this.updateView();
+        this.updateModel();
+        // this.updateView();
       });
     }
     this.updateView();
@@ -102,7 +102,7 @@ updateView() {
       let txt: string = this.model.value[key];
       if (field.nodeName === 'TEXTAREA') {
         (<HTMLTextAreaElement>field).value = ''+txt;
-      } else if( field.nodeName === 'INPUT') {
+      } else if(field.nodeName === 'INPUT' && (<HTMLInputElement>field).type === 'checkbox') {
         if(JSON.parse(txt) === '1') {
         (<HTMLInputElement>field).checked = true;
         } else {
