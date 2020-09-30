@@ -96,10 +96,30 @@ getKeyByValue(object:Map<string, HTMLElement>, value:HTMLElement) {
   return Object.keys(object).find(key => object.get(key) === value);
 }
 
-updateView() {
+// updateView() {
+//     console.log('running updateView');
+//     for (let key in this.model.value) {
+//       let field = this.m.get(key)!;
+//       let txt: string = this.model.value[key];
+//       if (field.nodeName === 'TEXTAREA') {
+//         (<HTMLTextAreaElement>field).value = ''+txt;
+//       } else if(field.nodeName === 'INPUT' && (<HTMLInputElement>field).type === 'checkbox') {
+//         if(JSON.parse(txt) === '1') {
+//           console.log('updateView: is checked');
+//           (<HTMLInputElement>field).checked = true;
+//         } else {
+//           console.log('updateView: not checked');
+//           (<HTMLInputElement>field).checked = false;
+//         }
+//       }
+//     }
+//   }
+  updateView() {
     console.log('running updateView');
     for (let key in this.model.value) {
+      console.log('key: ' + key);
       let field = this.m.get(key)!;
+      console.log('field: ' + field);
       let txt: string = this.model.value[key];
       if (field.nodeName === 'TEXTAREA') {
         (<HTMLTextAreaElement>field).value = ''+txt;
