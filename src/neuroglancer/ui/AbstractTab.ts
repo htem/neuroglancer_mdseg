@@ -97,6 +97,7 @@ getKeyByValue(object:Map<string, HTMLElement>, value:HTMLElement) {
 }
 
 updateView() {
+    console.log('running updateView');
     for (let key in this.model.value) {
       let field = this.m.get(key)!;
       let txt: string = this.model.value[key];
