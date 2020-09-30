@@ -105,9 +105,11 @@ updateView() {
         (<HTMLTextAreaElement>field).value = ''+txt;
       } else if(field.nodeName === 'INPUT' && (<HTMLInputElement>field).type === 'checkbox') {
         if(JSON.parse(txt) === '1') {
-        (<HTMLInputElement>field).checked = true;
+          console.log('updateView: is checked');
+          (<HTMLInputElement>field).checked = true;
         } else {
-        (<HTMLInputElement>field).checked = false;
+          console.log('updateView: not checked');
+          (<HTMLInputElement>field).checked = false;
         }
       }
     }
