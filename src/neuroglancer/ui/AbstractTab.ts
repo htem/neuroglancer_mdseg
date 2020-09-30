@@ -40,8 +40,8 @@ export abstract class Atab extends Tab {
     div_inpArea.appendChild(linebreak);
     div_inpArea.appendChild(linebreak);
     this.element.appendChild(div_inpArea);
-    this.registerDisposer(this.model.changed.add(() => this.updateView()));
-    // this.registerDisposer(this.visibility.changed.add(() => this.updateView()));
+    // this.registerDisposer(this.model.changed.add(() => this.updateView()));
+    this.registerDisposer(this.visibility.changed.add(() => this.updateView()));
     if(id) {
       input.id= id;
     }
@@ -76,8 +76,8 @@ export abstract class Atab extends Tab {
       div_textArea.appendChild(txarea);
     }
     this.element.appendChild(div_textArea);
-    this.registerDisposer(this.model.changed.add(() => this.updateView()));
-    // this.registerDisposer(this.visibility.changed.add(() => this.updateView()));
+    // this.registerDisposer(this.model.changed.add(() => this.updateView()));
+    this.registerDisposer(this.visibility.changed.add(() => this.updateView()));
     txarea.addEventListener('save', () => this.updateModel());
     txarea.addEventListener('blur', () => this.updateModel());
     txarea.rows = rows;
