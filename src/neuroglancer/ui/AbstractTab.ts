@@ -53,7 +53,7 @@ export abstract class Atab extends Tab {
     } else {
       input.addEventListener('change',() => {
         this.updateModel();
-        this.updateView();
+        // this.updateView();
       });
     }
     this.updateView();
