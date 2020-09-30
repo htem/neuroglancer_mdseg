@@ -55,6 +55,7 @@ export abstract class Atab extends Tab {
               this.updateModel();
               });
     }
+    this.updateView();
   }
 
    addTextField(tarea:HTMLTextAreaElement, title:string, type:titleType, rows:number=1, cols:number=24) {
