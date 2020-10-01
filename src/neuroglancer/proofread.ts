@@ -84,8 +84,8 @@ export class Proofread implements WatchableValueInterface<IValue> {
   }
 
   toJSON() {
-    let result: IValue = {};
-    // console.log('value in toJSON (pr): ' + JSON.stringify(this._value));
+    let result: any = {};
+    console.log('value in toJSON (pr): ' + JSON.stringify(this._value));
     for(let key in this._value) {
       let label = key;
       let value = this._value[key];
@@ -108,8 +108,8 @@ export class Proofread implements WatchableValueInterface<IValue> {
         result[label] = value;
       }
     }
-    console.log('result in toJSON (pr): ' + JSON.stringify(result))
-    return result;
+    console.log('result in toJSON (pr): ' + JSON.stringify(result));
+    return JSON.stringify(result);
     // return this._value;
   }
 
