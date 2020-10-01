@@ -82,6 +82,7 @@ export abstract class Atab extends Tab {
     // this.registerDisposer(this.visibility.changed.add(() => this.updateView()));
     txarea.addEventListener('save', () => this.updateModel());
     txarea.addEventListener('blur', () => this.updateModel());
+    // txarea.addEventListener('change', () => this.updateModel());
     txarea.rows = rows;
     txarea.cols = cols;
     this.updateView();
