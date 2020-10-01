@@ -85,7 +85,7 @@ export class Proofread implements WatchableValueInterface<IValue> {
 
   toJSON() {
     let result: IValue = {};
-    console.log('pr json: ' + JSON.stringify(this._value));
+    console.log('value in toJSON (pr): ' + JSON.stringify(this._value));
     for(let key in this._value) {
       let label = key;
       let value = this._value[key];
