@@ -84,27 +84,27 @@ export class Proofread implements WatchableValueInterface<IValue> {
   }
 
   toJSON() {
-    let result: IValue = {};
-    console.log('value in toJSON (pr): ' + JSON.stringify(this._value));
-    for(let key in this._value) {
-      let label = key;
-      let value = this._value[key];
-      if((label === 'prFinished' && value === '1') ||
-          (label === 'prReviewed' && value === '1') ||
-          (label === 'prOverrideSuperSetCheck' && value === '1') ||
-          (label === 'prOverrideConflictCheck' && value === '1')) {
-        result[label] = value;
-      }
-      if(value !== '' &&
-          label !== 'prFinished' &&
-          label !== 'prReviewed' &&
-          label !== 'prOverrideSuperSetCheck' &&
-          label !== 'prOverrideConflictCheck') {
-        result[label] = value;
-      }
-    }
-    return result;
-    // return this._value;
+    // let result: IValue = {};
+    // console.log('value in toJSON (pr): ' + JSON.stringify(this._value));
+    // for(let key in this._value) {
+    //   let label = key;
+    //   let value = this._value[key];
+    //   if((label === 'prFinished' && value === '1') ||
+    //       (label === 'prReviewed' && value === '1') ||
+    //       (label === 'prOverrideSuperSetCheck' && value === '1') ||
+    //       (label === 'prOverrideConflictCheck' && value === '1')) {
+    //     result[label] = value;
+    //   }
+    //   if(value !== '' &&
+    //       label !== 'prFinished' &&
+    //       label !== 'prReviewed' &&
+    //       label !== 'prOverrideSuperSetCheck' &&
+    //       label !== 'prOverrideConflictCheck') {
+    //     result[label] = value;
+    //   }
+    // }
+    // return result;
+    return this._value;
   }
 
   restoreState(x: IValue) {
