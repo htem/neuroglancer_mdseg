@@ -109,7 +109,7 @@ export class Proofread implements WatchableValueInterface<IValue> {
       }
     }
     console.log('result in toJSON (pr): ' + JSON.stringify(result));
-    return JSON.stringify(result);
+    return result;
     // return this._value;
   }
 
