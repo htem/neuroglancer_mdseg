@@ -84,11 +84,13 @@ export class Proofread implements WatchableValueInterface<IValue> {
   }
 
   toJSON() {
-    let result: any = {};
+    let valueCopy = this._value;
+    let result: IValue = {};
     console.log('value in toJSON (pr): ' + JSON.stringify(this._value));
-    for(let key in this._value) {
+    console.log('valueCopy in toJSON (pr): ' + JSON.stringify(valueCopy));
+    for(let key in valueCopy) {
       let label = key;
-      let value = this._value[key];
+      let value = valueCopy[key];
       // result[label] = value;
       // if((label === 'prFinished' && value === '1') ||
       //     (label === 'prReviewed' && value === '1') ||
