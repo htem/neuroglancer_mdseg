@@ -90,22 +90,26 @@ export class Proofread implements WatchableValueInterface<IValue> {
       let label = key;
       let value = this._value[key];
       // result[label] = value;
-      if((label === 'prFinished' && value === '1') ||
+      // if((label === 'prFinished' && value === '1') ||
+      //     (label === 'prReviewed' && value === '1') ||
+      //     (label === 'prOverrideSuperSetCheck' && value === '1') ||
+      //     (label === 'prOverrideConflictCheck' && value === '1')) {
+      //   result[label] = value;
+      // }
+      if(value !== '' &&
+          label !== 'prFinished' &&
+          label !== 'prReviewed' &&
+          label !== 'prOverrideSuperSetCheck' &&
+          label !== 'prOverrideConflictCheck' ||
+          (label === 'prFinished' && value === '1') ||
           (label === 'prReviewed' && value === '1') ||
           (label === 'prOverrideSuperSetCheck' && value === '1') ||
           (label === 'prOverrideConflictCheck' && value === '1')) {
         result[label] = value;
       }
-      if(value !== '' &&
-          label !== 'prFinished' &&
-          label !== 'prReviewed' &&
-          label !== 'prOverrideSuperSetCheck' &&
-          label !== 'prOverrideConflictCheck') {
-        result[label] = value;
-      }
     }
     console.log('result in toJSON (pr): ' + JSON.stringify(result))
-    return JSON.stringify(result);
+    return result;
     // return this._value;
   }
 
