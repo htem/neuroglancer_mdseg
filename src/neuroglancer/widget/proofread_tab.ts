@@ -93,7 +93,8 @@ export class ProofreadTab extends Atab {
 
   updateModel() {
     try {
-      console.log('value in update model (pr): ' + JSON.stringify(this.transform._value));
+      console.log('_value in update model (pr): ' + JSON.stringify(this.transform._value));
+      console.log('.value in update model (pr): ' + JSON.stringify(this.transform.value));
       for (let key in this.transform._value) {
         let field = this.m.get(key)!;
         if(field.nodeName === 'TEXTAREA') {
