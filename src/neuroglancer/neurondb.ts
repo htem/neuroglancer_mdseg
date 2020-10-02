@@ -30,7 +30,8 @@ export interface IValue {
 
 export class Neurondb implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
-  _value: IValue;
+  private _value: IValue;
+
   constructor() {
     // maybe you can add to same dictionary instead of array of dictionary
     let textArea: IValue = {};

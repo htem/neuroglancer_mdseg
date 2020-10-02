@@ -31,7 +31,7 @@ export interface IValue {
 export class Proofread implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
 
-  _value: IValue;
+  private _value: IValue;
   private emptyTextArea: IValue;
 
   constructor() {

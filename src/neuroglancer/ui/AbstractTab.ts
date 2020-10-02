@@ -117,20 +117,15 @@ getKeyByValue(object:Map<string, HTMLElement>, value:HTMLElement) {
 //   }
 
   updateView() {
-    // console.log('running updateView');
     for (let key in this.model.value) {
-      // console.log('key: ' + key);
       let field = this.m.get(key)!;
-      // console.log('field: ' + field);
       let txt = this.model.value[key];
       if (field.nodeName === 'TEXTAREA') {
         (<HTMLTextAreaElement>field).value = ''+txt;
       } else if(field.nodeName === 'INPUT' && (<HTMLInputElement>field).type === 'checkbox') {
         if(txt === '1') {
-          // console.log(key + ' is checked');
           (<HTMLInputElement>field).checked = true;
         } else {
-          // console.log(key + ' is not checked');
           (<HTMLInputElement>field).checked = false;
         }
       }

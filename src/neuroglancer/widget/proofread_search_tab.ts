@@ -102,17 +102,17 @@ export class ProofreadSearchTab extends Atab {
 
   updateModel() {
   try {
-      for (let key in this.transform._value) {
+      for (let key in this.transform.value) {
         let field = this.m.get(key)!;
         field.id = key;
         if(field.nodeName === 'TEXTAREA') {
-          this.transform._value[key]= (<HTMLTextAreaElement>field).value;
+          this.transform.value[key]= (<HTMLTextAreaElement>field).value;
         } else if(field.nodeName === 'INPUT' && (<HTMLInputElement>field).type === 'checkbox') {
 
           if((<HTMLInputElement>field).checked) {
-            this.transform._value[key] = '1';
+            this.transform.value[key] = '1';
             } else {
-            this.transform._value[key] = '0';
+            this.transform.value[key] = '0';
             }
         }
       }

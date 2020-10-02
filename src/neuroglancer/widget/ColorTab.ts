@@ -23,7 +23,7 @@ import {Color} from 'neuroglancer/color';
 import {Atab} from 'neuroglancer/ui/AbstractTab';
 
 export class ColorTab extends Atab {
-  
+
   private set_color_val = document.createElement('textarea');
   private clSetVal = document.createElement('input');
   private clClear = document.createElement('input');
@@ -34,17 +34,17 @@ export class ColorTab extends Atab {
 
   constructor(public transform: Color) {
     super(transform);
-   
-    this.m.set("set_color_val",this.set_color_val);
-    this.m.set("clSetVal",this.clSetVal);
-    this.m.set("clClear",this.clClear);
-    this.m.set("clNeuronColor",this.clNeuronColor);
-    this.m.set("clAlsoLoadNeurons",this.clAlsoLoadNeurons);
-    this.m.set("clClearBeforeLoad",this.clClearBeforeLoad);
-    
+
+    this.m.set('set_color_val',this.set_color_val);
+    this.m.set('clSetVal',this.clSetVal);
+    this.m.set('clClear',this.clClear);
+    this.m.set('clNeuronColor',this.clNeuronColor);
+    this.m.set('clAlsoLoadNeurons',this.clAlsoLoadNeurons);
+    this.m.set('clClearBeforeLoad',this.clClearBeforeLoad);
+
     const {element} = this;
     element.classList.add('neuroglancer-Color-widget');
-    
+
     this.addTextField(this.set_color_val,'Color value','H3');
     this.addInputElement(this.clSetVal,'Set color to selections','button','clSetVal');
     this.addInputElement(this.clClear,'Clear colors','button','clClear');
@@ -54,25 +54,25 @@ export class ColorTab extends Atab {
     this.addInputElement(this.clClearBeforeLoad,'Clear segments before load');
 
     this.updateView();
-  }  
-  
+  }
+
  updateModel() {
-  try{
-      for (let key in this.transform._value){
+  try {
+      for (let key in this.transform.value) {
         let field = this.m.get(key)!;
-        if(field.nodeName == 'TEXTAREA'){
-          this.transform._value[key]= (<HTMLTextAreaElement>field).value;
-        }else if(field.nodeName == 'INPUT' && (<HTMLInputElement>field).type === "checkbox"){
-          
-          if((<HTMLInputElement>field).checked){
-            this.transform._value[key] = '1';
-            }else{
-            this.transform._value[key] = '0';
+        if(field.nodeName === 'TEXTAREA') {
+          this.transform.value[key]= (<HTMLTextAreaElement>field).value;
+        } else if(field.nodeName === 'INPUT' && (<HTMLInputElement>field).type === 'checkbox') {
+
+          if((<HTMLInputElement>field).checked) {
+            this.transform.value[key] = '1';
+            } else {
+            this.transform.value[key] = '0';
             }
         }
       }
       this.transform.changed.dispatch();
-    }catch{
+    } catch {
       this.updateView();
     }
   }
