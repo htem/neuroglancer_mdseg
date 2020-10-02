@@ -32,6 +32,7 @@ export class Proofread implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
 
   _value: IValue;
+  private emptyTextArea: IValue;
 
   constructor() {
     // maybe you can add to same dictionary instead of array of dictionary
@@ -53,6 +54,7 @@ export class Proofread implements WatchableValueInterface<IValue> {
     textArea['prSuperGrowThreshold']='';
 
     this._value =textArea;
+    this.emptyTextArea = textArea;
   }
 
   get value() {
@@ -84,38 +86,51 @@ export class Proofread implements WatchableValueInterface<IValue> {
   }
 
   toJSON() {
-    let valueCopy = this._value;
-    let result: IValue = {};
-    console.log('value in toJSON (pr): ' + JSON.stringify(this._value));
-    console.log('valueCopy in toJSON (pr): ' + JSON.stringify(valueCopy));
-    for(let key in valueCopy) {
-      let label = key;
-      let value = valueCopy[key];
-      // result[label] = value;
-      // if((label === 'prFinished' && value === '1') ||
-      //     (label === 'prReviewed' && value === '1') ||
-      //     (label === 'prOverrideSuperSetCheck' && value === '1') ||
-      //     (label === 'prOverrideConflictCheck' && value === '1')) {
-      //   result[label] = value;
-      // }
-      // if(value !== '' &&
-      //     label !== 'prFinished' &&
-      //     label !== 'prReviewed' &&
-      //     label !== 'prOverrideSuperSetCheck' &&
-      //     label !== 'prOverrideConflictCheck' ||
-      //     (label === 'prFinished' && value === '1') ||
-      //     (label === 'prReviewed' && value === '1') ||
-      //     (label === 'prOverrideSuperSetCheck' && value === '1') ||
-      //     (label === 'prOverrideConflictCheck' && value === '1')) {
-      //   result[label] = value;
-      // }
-      if(value !== '') {
-        result[label] = value;
-      }
+    // console.log('first time: ' + this.firstTime);
+    console.log('emptyTextArea: ' + JSON.stringify(this.emptyTextArea));
+    console.log('_value: ' + JSON.stringify(this._value));
+    if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
+      return {};
+    } else {
+      return this._value;
     }
-    console.log('result in toJSON (pr): ' + JSON.stringify(result));
-    return result;
-    // return this._value;
+
+    // let result: IValue = {};
+    // console.log('value in toJSON (pr): ' + JSON.stringify(this._value));
+    // for(let key in this._value) {
+    //   let label = key;
+    //   let value = this._value[key];
+    //   // result[label] = value;
+    //   // if((label === 'prFinished' && value === '1') ||
+    //   //     (label === 'prReviewed' && value === '1') ||
+    //   //     (label === 'prOverrideSuperSetCheck' && value === '1') ||
+    //   //     (label === 'prOverrideConflictCheck' && value === '1')) {
+    //   //   result[label] = value;
+    //   // }
+    //   // if(value !== '' &&
+    //   //     label !== 'prFinished' &&
+    //   //     label !== 'prReviewed' &&
+    //   //     label !== 'prOverrideSuperSetCheck' &&
+    //   //     label !== 'prOverrideConflictCheck' ||
+    //   //     (label === 'prFinished' && value === '1') ||
+    //   //     (label === 'prReviewed' && value === '1') ||
+    //   //     (label === 'prOverrideSuperSetCheck' && value === '1') ||
+    //   //     (label === 'prOverrideConflictCheck' && value === '1')) {
+    //   //   result[label] = value;
+    //   // }
+    //   // if(value !== '') {
+    //   //   result[label] = value;
+    //   // }
+    // }
+    // console.log('result in toJSON (pr): ' + JSON.stringify(result));
+    // return result;
+    // var firstTime = localStorage.getItem('first_time');
+    // if(!firstTime) {
+    //   localStorage.setItem('first_time','1');
+    //   return {};
+    // } else {
+    //   return this._value;
+    // }
   }
 
   restoreState(x: IValue) {

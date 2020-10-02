@@ -65,8 +65,14 @@ export function UserLayerWithProofreadMixin<TBase extends {new (...args: any[]):
     }
     toJSON(): any {
       const x = super.toJSON();
+      // var firstTime = localStorage.getItem('first_time');
+      // if(!firstTime) {
+      //   localStorage.setItem('first_time','1');
+      //   x[PROOFREAD_KEY] = {};
+      // } else {
+      //   x[PROOFREAD_KEY] = this.pr.toJSON();
+      // }
       x[PROOFREAD_KEY] = this.pr.toJSON();
-      // x[NEURONDB_KEY] = this.sr.toJSON();
       return x;
     }
   }
