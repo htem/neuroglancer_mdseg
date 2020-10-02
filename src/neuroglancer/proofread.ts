@@ -86,7 +86,7 @@ export class Proofread implements WatchableValueInterface<IValue> {
   }
 
   toJSON() {
-    console.log('pr value: ' + this._value);
+    console.log('pr value: ' + JSON.stringify(this._value));
     if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
       return {};
     } else {
