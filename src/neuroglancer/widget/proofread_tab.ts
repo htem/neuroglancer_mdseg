@@ -106,7 +106,7 @@ export class ProofreadTab extends Atab {
           }
         }
       }
-      // this.transform.changed.dispatch();
+      this.transform.changed.dispatch();
     } catch {
       this.updateView();
     }
