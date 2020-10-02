@@ -31,6 +31,7 @@ export interface IValue {
 export class Neurondb implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
   private _value: IValue;
+  private emptyTextArea: IValue;
 
   constructor() {
     // maybe you can add to same dictionary instead of array of dictionary
@@ -49,6 +50,7 @@ export class Neurondb implements WatchableValueInterface<IValue> {
     textArea['dbLoadWithoutChildren']='0';
 
     this._value =textArea;
+    this.emptyTextArea = textArea;
   }
 
   get value() {
@@ -77,41 +79,13 @@ export class Neurondb implements WatchableValueInterface<IValue> {
   }
 
   toJSON() {
-    // let result = this._value;
-    // for(let key in this._value) {
-    //   let label = key;
-    //   let value = result[key];
-    //   if((label === 'dbFindFinished' && value === '0') ||
-    //       (label === 'dbFindReviewed' && value === '0') ||
-    //       (label === 'dbLoadWithoutChildren' && value === '0')) {
-    //     delete result[label];
-    //   }
-    //   if(value === '' &&
-    //       label !== 'dbFindFinished' &&
-    //       label !== 'dbFindReviewed' &&
-    //       label !== 'dbLoadWithoutChildren') {
-    //     delete result[label];
-    //   }
-    // }
-    // let result: IValue = {};
-    // for(let key in this._value) {
-    //   let label = key;
-    //   let value = this._value[key];
-    //   if((label === 'dbFindFinished' && value === '1') ||
-    //       (label === 'dbFindReviewed' && value === '1') ||
-    //       (label === 'dbLoadWithoutChildren' && value === '1')) {
-    //     result[label] = value;
-    //   }
-    //   if(value !== '' &&
-    //       label !== 'dbFindFinished' &&
-    //       label !== 'dbFindReviewed' &&
-    //       label !== 'dbLoadWithoutChildren') {
-    //     result[label] = value;
-    //   }
-    // }
-    // return result;
-    // this.changed.dispatch; //////////////////////////////////////////////////////////
-    return this._value;
+    console.log('emptyTextArea: ' + JSON.stringify(this.emptyTextArea));
+    console.log('_value: ' + JSON.stringify(this._value));
+    if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
+      return {};
+    } else {
+      return this._value;
+    }
   }
 
   restoreState(x: IValue) {
