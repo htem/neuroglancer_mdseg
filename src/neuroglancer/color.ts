@@ -43,6 +43,7 @@ export class Color implements WatchableValueInterface<IValue> {
     textArea['clClearBeforeLoad']='0';
 
     this._value =textArea;
+    this.emptyTextArea = textArea;
   }
 
   get value() {
