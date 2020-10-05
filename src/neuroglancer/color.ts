@@ -32,7 +32,7 @@ export class Color implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
 
   private _value: IValue;
-  private emptyTextArea: IValue;
+  // private emptyTextArea: IValue;
 
   constructor() {
     // maybe you can add to same dictionary instead of array of dictionary
@@ -43,7 +43,7 @@ export class Color implements WatchableValueInterface<IValue> {
     textArea['clClearBeforeLoad']='0';
 
     this._value =textArea;
-    this.emptyTextArea = textArea;
+    // this.emptyTextArea = textArea;
   }
 
   get value() {
@@ -62,11 +62,12 @@ export class Color implements WatchableValueInterface<IValue> {
   }
 
   toJSON() {
-    if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
-      return {};
-    } else {
-      return this._value;
-    }
+    // if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
+    //   return {};
+    // } else {
+    //   return this._value;
+    // }
+    return this._value;
   }
 
   restoreState(x: IValue) {
