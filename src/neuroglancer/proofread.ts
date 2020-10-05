@@ -18,16 +18,14 @@ import {NullarySignal} from 'neuroglancer/util/signal';
 
 
 
-/**
- * Class for representing a coordinate transform specified by a user.
- *
- * Typically it represents a transform from a local coordinate space to a global coordinate space.
- */
 
 export interface IValue {
   [details: string]: string;
 }
 
+/**
+ * Model for the Proofread tab. Keeps track of the state of text boxes and checkboxes in the Proofread tab.
+ */
 export class Proofread implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
 
@@ -57,12 +55,15 @@ export class Proofread implements WatchableValueInterface<IValue> {
     // this.emptyTextArea = textArea;
   }
 
+  /**
+   * Getter for _value.
+   */
   get value() {
     return this._value;
   }
 
   /**
-   * Resets to the .
+   * Resets all values to either an empty string or 0.
    */
   reset() {
    let textArea: IValue = {};
@@ -84,6 +85,7 @@ export class Proofread implements WatchableValueInterface<IValue> {
    this._value = textArea;
    this.changed.dispatch();
   }
+
 
   toJSON() {
     // console.log('pr value: ' + JSON.stringify(this._value));

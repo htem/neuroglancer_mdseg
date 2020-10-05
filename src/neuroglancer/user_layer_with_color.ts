@@ -25,11 +25,10 @@ const COLOR_KEY = 'colors';
 
 export interface UserLayerWithColor extends UserLayer {
     cl: Color;
-    
 }
 
 /**
- * Mixin that adds a `Color` tab to a user layer.
+ * Mixin that combines the Color model with the Color view.
  */
 export function UserLayerWithColorMixin<TBase extends {new (...args: any[]): UserLayer}>(
     Base: TBase) {
@@ -39,7 +38,7 @@ export function UserLayerWithColorMixin<TBase extends {new (...args: any[]): Use
 
     constructor(...args: any[]) {
       super(...args);
-      
+
       this.cl.changed.add(this.specificationChanged.dispatch);
       this.tabs.add(COLOR_TAB_NAME, {
         label: COLOR_TAB_NAME,
@@ -48,7 +47,7 @@ export function UserLayerWithColorMixin<TBase extends {new (...args: any[]): Use
       });
       const specification = args[1];
       this.cl.restoreState(specification[COLOR_KEY]);
-    
+
 
     }
     toJSON(): any {

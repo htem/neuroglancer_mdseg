@@ -23,7 +23,9 @@ import './coordinate_transform.css';
 import {Atab} from 'neuroglancer/ui/AbstractTab';
 import {Neurondb} from 'neuroglancer/neurondb';
 
-
+/**
+ * View for the Search DB tab.
+ */
 export class ProofreadSearchTab extends Atab {
 
 
@@ -99,7 +101,9 @@ export class ProofreadSearchTab extends Atab {
   }
 
 
-
+  /**
+   * Uses the values in the text boxes and checkboxes to update the model for the Search DB tab.
+   */
   updateModel() {
   try {
       for (let key in this.transform.value) {

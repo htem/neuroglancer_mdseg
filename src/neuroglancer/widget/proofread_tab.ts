@@ -23,6 +23,9 @@ import {Atab} from 'neuroglancer/ui/AbstractTab';
 import {Proofread} from 'neuroglancer/proofread';
 
 
+/**
+ * View for the Proofread tab.
+ */
 export class ProofreadTab extends Atab {
 
   m: Map<string,HTMLElement> = new Map();
@@ -91,6 +94,9 @@ export class ProofreadTab extends Atab {
     this.updateView();
   }
 
+  /**
+   * Uses the values in the text boxes and checkboxes to update the model for the Proofread tab.
+   */
   updateModel() {
     try {
       for (let key in this.transform.value) {

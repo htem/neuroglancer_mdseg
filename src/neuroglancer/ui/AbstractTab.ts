@@ -10,6 +10,9 @@ export interface IValue {
   [details: string]: string;
 }
 
+/**
+ * Represents a tab for Proofread, Search DB, and Color.
+ */
 export abstract class Atab extends Tab {
 
     m:Map<string,HTMLElement> = new Map();
@@ -18,7 +21,14 @@ export abstract class Atab extends Tab {
         super();
     }
 
- addInputElement(inp:HTMLInputElement,title:string,type:buttonType = 'checkbox',id?:string) {
+  /**
+   * Adds an HTML input element to the tab.
+   * @param inp the HTML input element to add.
+   * @param title The title of the input element.
+   * @param type The type of input element to add.
+   * @param id The id the of input element.
+   */
+  addInputElement(inp:HTMLInputElement, title:string, type:buttonType = 'checkbox', id?:string) {
     const linebreak = document.createElement('br');
     const input = inp;
     const div_inpArea = document.createElement('DIV');
@@ -58,6 +68,14 @@ export abstract class Atab extends Tab {
     this.updateView();
   }
 
+  /**
+   * Adds an HTML text area element to the tab.
+   * @param tarea The HTML text area element to add.
+   * @param title The title of the text area to add.
+   * @param type The type of text to use for the title of the text area.
+   * @param rows The height of the text area to add.
+   * @param cols The width of the text area to add.
+   */
    addTextField(tarea:HTMLTextAreaElement, title:string, type:titleType, rows:number=1, cols:number=24) {
     const txarea = tarea;
     const div_textArea = document.createElement('DIV');
@@ -115,6 +133,9 @@ getKeyByValue(object:Map<string, HTMLElement>, value:HTMLElement) {
 //     }
 //   }
 
+  /**
+   * Updates the view of a tab using the tab's model.
+   */
   updateView() {
     for (let key in this.model.value) {
       let field = this.m.get(key)!;

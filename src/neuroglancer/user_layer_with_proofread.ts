@@ -29,11 +29,10 @@ const PROOFREAD_KEY = 'pr';
 
 export interface UserLayerWithProofread extends UserLayer {
   pr: Proofread;
-  // sr: Neurondb;
 }
 
 /**
- * Mixin that adds a `Proofread` tab to a user layer.
+ * Mixin that combines the Proofread model with the Proofread view.
  */
 export function UserLayerWithProofreadMixin<TBase extends {new (...args: any[]): UserLayer}>(
     Base: TBase) {

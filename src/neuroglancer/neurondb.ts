@@ -18,16 +18,13 @@ import {NullarySignal} from 'neuroglancer/util/signal';
 
 
 
-/**
- * Class for representing a coordinate transform specified by a user.
- *
- * Typically it represents a transform from a local coordinate space to a global coordinate space.
- */
-
 export interface IValue {
   [details: string]: string;
 }
 
+/**
+ * Model for the Search DB tab. Keeps track of the state of text boxes and checkboxes in the Search DB tab.
+ */
 export class Neurondb implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
   private _value: IValue;
@@ -53,12 +50,15 @@ export class Neurondb implements WatchableValueInterface<IValue> {
     // this.emptyTextArea = textArea;
   }
 
+  /**
+   * Getter for _value.
+   */
   get value() {
     return this._value;
   }
 
   /**
-   * Resets to the .
+   * Resets all values to either an empty string or 0.
    */
   reset() {
    let textArea: IValue = {};
@@ -78,6 +78,9 @@ export class Neurondb implements WatchableValueInterface<IValue> {
    this.changed.dispatch();
   }
 
+  /**
+   * Returns the state of the Search DB tab as a JSON.
+   */
   toJSON() {
     // if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
     //   return {};

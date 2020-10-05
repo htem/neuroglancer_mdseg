@@ -26,7 +26,7 @@ export interface UserLayerWithNeurondb extends UserLayer {
 }
 
 /**
- * Mixin that adds a `Proofread` tab to a user layer.
+ * Mixin that combines the Search DB model with the Search DB view.
  */
 export function UserLayerWithNeurondbMixin<TBase extends {new (...args: any[]): UserLayer}>(
     Base: TBase) {
