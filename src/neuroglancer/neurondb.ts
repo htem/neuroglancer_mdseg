@@ -28,7 +28,7 @@ export interface IValue {
 export class Neurondb implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
   private _value: IValue;
-  // private emptyTextArea: IValue;
+  private emptyTextArea: IValue;
 
   constructor() {
     // maybe you can add to same dictionary instead of array of dictionary
@@ -47,7 +47,7 @@ export class Neurondb implements WatchableValueInterface<IValue> {
     textArea['dbLoadWithoutChildren']='0';
 
     this._value =textArea;
-    // this.emptyTextArea = textArea;
+    this.emptyTextArea = textArea;
   }
 
   /**
@@ -82,11 +82,11 @@ export class Neurondb implements WatchableValueInterface<IValue> {
    * Returns the state of the Search DB tab as a JSON.
    */
   toJSON() {
-    // if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
-    //   return {};
-    // } else {
-    //   return this._value;
-    // }
+    if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
+      return {};
+    } else {
+      return this._value;
+    }
     return this._value;
   }
 
