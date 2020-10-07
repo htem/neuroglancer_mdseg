@@ -30,7 +30,7 @@ export class Proofread implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
 
   private _value: IValue;
-  private emptyTextArea: IValue;
+  // private emptyTextArea: IValue;
 
   constructor() {
     // maybe you can add to same dictionary instead of array of dictionary
@@ -52,7 +52,7 @@ export class Proofread implements WatchableValueInterface<IValue> {
     textArea['prSuperGrowThreshold']='';
 
     this._value =textArea;
-    this.emptyTextArea = textArea;
+    // this.emptyTextArea = textArea;
   }
 
   /**
@@ -89,12 +89,34 @@ export class Proofread implements WatchableValueInterface<IValue> {
 
   toJSON() {
     console.log('pr value: ' + JSON.stringify(this._value));
-    if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
-      return {};
-    } else {
-      return this._value;
+    let result: IValue = {};
+    for(let key in this._value) {
+      let label = key;
+      let value = this._value[key];
+
+      if(value !== '' &&
+        label !== 'prFinished' &&
+        label !== 'prReviewed' &&
+        label !== 'prOverrideSuperSetCheck' &&
+        label !== 'prOverrideConflictCheck' ||
+          ((label === 'prFinished' && value === '1') ||
+          (label === 'prReviewed' && value === '1') ||
+          (label === 'prOverrideSuperSetCheck' && value === '1') ||
+          (label === 'prOverrideConflictCheck' && value === '1'))) {
+        result[label] = value;
+      }
     }
-    return this._value;
+    console.log('result in toJSON (pr): ' + JSON.stringify(result));
+    return result;
+
+
+
+    // if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
+    //   return {};
+    // } else {
+    //   return this._value;
+    // }
+    // return this._value;
   }
 
   restoreState(x: IValue) {

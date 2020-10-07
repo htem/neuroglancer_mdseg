@@ -30,7 +30,7 @@ export class Color implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
 
   private _value: IValue;
-  private emptyTextArea: IValue;
+  // private emptyTextArea: IValue;
 
   constructor() {
     // maybe you can add to same dictionary instead of array of dictionary
@@ -41,7 +41,7 @@ export class Color implements WatchableValueInterface<IValue> {
     textArea['clClearBeforeLoad']='0';
 
     this._value =textArea;
-    this.emptyTextArea = textArea;
+    // this.emptyTextArea = textArea;
   }
 
   /**
@@ -69,12 +69,27 @@ export class Color implements WatchableValueInterface<IValue> {
    * Returns the state of the Color tab as a JSON.
    */
   toJSON() {
-    if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
-      return {};
-    } else {
-      return this._value;
+    let result: IValue = {};
+    for(let key in this._value) {
+      let label = key;
+      let value = this._value[key];
+
+      if(value !== '' &&
+          label !== 'clAlsoLoadNeurons' &&
+          label !== 'clClearBeforeLoad' ||
+          ((label === 'clAlsoLoadNeurons' && value === '1') ||
+              (label === 'clClearBeforeLoad' && value === '1'))) {
+        result[label] = value;
+      }
     }
-    return this._value;
+    return result;
+
+    // if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
+    //   return {};
+    // } else {
+    //   return this._value;
+    // }
+    // return this._value;
   }
 
   restoreState(x: IValue) {

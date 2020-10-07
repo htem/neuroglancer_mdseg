@@ -28,7 +28,7 @@ export interface IValue {
 export class Neurondb implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
   private _value: IValue;
-  private emptyTextArea: IValue;
+  // private emptyTextArea: IValue;
 
   constructor() {
     // maybe you can add to same dictionary instead of array of dictionary
@@ -47,7 +47,7 @@ export class Neurondb implements WatchableValueInterface<IValue> {
     textArea['dbLoadWithoutChildren']='0';
 
     this._value =textArea;
-    this.emptyTextArea = textArea;
+    // this.emptyTextArea = textArea;
   }
 
   /**
@@ -82,12 +82,29 @@ export class Neurondb implements WatchableValueInterface<IValue> {
    * Returns the state of the Search DB tab as a JSON.
    */
   toJSON() {
-    if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
-      return {};
-    } else {
-      return this._value;
+    let result: IValue = {};
+    for(let key in this._value) {
+      let label = key;
+      let value = this._value[key];
+
+      if(value !== '' &&
+          label !== 'dbFindFinished' &&
+          label !== 'dbFindReviewed' &&
+          label !== 'dbLoadWithoutChildren' ||
+          ((label === 'dbFindFinished' && value === '1') ||
+              (label === 'dbFindReviewed' && value === '1') ||
+              (label === 'dbLoadWithoutChildren' && value === '1'))) {
+        result[label] = value;
+      }
     }
-    return this._value;
+    return result;
+
+    // if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
+    //   return {};
+    // } else {
+    //   return this._value;
+    // }
+    // return this._value;
   }
 
   restoreState(x: IValue) {
