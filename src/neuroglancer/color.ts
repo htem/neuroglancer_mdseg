@@ -69,6 +69,7 @@ export class Color implements WatchableValueInterface<IValue> {
    * Returns the state of the Color tab as a JSON.
    */
   toJSON() {
+    console.log('color value: ' + JSON.stringify(this._value));
     let result: IValue = {};
     for(let key in this._value) {
       let label = key;
@@ -82,6 +83,7 @@ export class Color implements WatchableValueInterface<IValue> {
         result[label] = value;
       }
     }
+    console.log('result in toJSON (color): ' + JSON.stringify(result));
     return result;
 
     // if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
