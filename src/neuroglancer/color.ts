@@ -40,8 +40,8 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
 
   constructor() {
     super();
-    this.add('clClearBeforeLoad', this.clClearBeforeLoad);
-    this.add('clAlsoLoadNeurons', this.clAlsoLoadNeurons);
+    super.add('clClearBeforeLoad', this.clClearBeforeLoad);
+    super.add('clAlsoLoadNeurons', this.clAlsoLoadNeurons);
 
     // maybe you can add to same dictionary instead of array of dictionary
     // let textArea: IValue = {};
