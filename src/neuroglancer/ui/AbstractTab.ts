@@ -148,7 +148,7 @@ getKeyByValue(object:Map<string, HTMLElement>, value:HTMLElement) {
       if (field.nodeName === 'TEXTAREA') {
         (<HTMLTextAreaElement>field).value = ''+value;
       } else if(field.nodeName === 'INPUT' && (<HTMLInputElement>field).type === 'checkbox') {
-        if((<TrackableBoolean>value).value) {
+        if((<TrackableBoolean>value).value === true) {
           // console.log(key + ' is checked');
           (<HTMLInputElement>field).checked = true;
         } else {
