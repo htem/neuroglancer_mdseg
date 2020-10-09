@@ -50,7 +50,6 @@ export class CompoundTrackable extends RefCounted implements Trackable {
     this.children.set(key, value);
     value.changed.add(this.changed.dispatch);
     this.changed.dispatch();
-    console.log(`${JSON.stringify(key)} added`);
     return () => {
       this.remove(key);
     };
@@ -77,6 +76,7 @@ export class CompoundTrackable extends RefCounted implements Trackable {
   }
 
   toJSON() {
+    console.log(this.children);
     const result = this.baseJSON();
     for (let [key, value] of this.children) {
       result[key] = value.toJSON();
