@@ -149,6 +149,7 @@ getKeyByValue(object:Map<string, HTMLElement>, value:HTMLElement) {
       if (field.tagName === 'TEXTAREA') {
         (<HTMLTextAreaElement>field).value = ''+value;
       } else if(field.tagName === 'INPUT') {
+        console.log('updateView: field is input');
         if((<TrackableBoolean>value).value) {
           console.log(key + ' is checked');
           (<HTMLInputElement>field).checked = true;
