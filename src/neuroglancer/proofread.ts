@@ -15,6 +15,7 @@
  */
 import {WatchableValueInterface} from 'neuroglancer/trackable_value';
 import {NullarySignal} from 'neuroglancer/util/signal';
+import {CompoundTrackable} from 'neuroglancer/util/trackable';
 
 
 
@@ -26,13 +27,14 @@ export interface IValue {
 /**
  * Model for the Proofread tab. Keeps track of the state of text boxes and checkboxes in the Proofread tab.
  */
-export class Proofread implements WatchableValueInterface<IValue> {
+export class Proofread extends CompoundTrackable implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
 
   private _value: IValue;
   // private emptyTextArea: IValue;
 
   constructor() {
+    super();
     // maybe you can add to same dictionary instead of array of dictionary
     let textArea: IValue = {};
     textArea['prNeuronName']= '';

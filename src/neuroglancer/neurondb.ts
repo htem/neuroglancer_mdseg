@@ -15,6 +15,7 @@
  */
 import {WatchableValueInterface} from 'neuroglancer/trackable_value';
 import {NullarySignal} from 'neuroglancer/util/signal';
+import {CompoundTrackable} from 'neuroglancer/util/trackable';
 
 
 
@@ -25,13 +26,14 @@ export interface IValue {
 /**
  * Model for the Search DB tab. Keeps track of the state of text boxes and checkboxes in the Search DB tab.
  */
-export class Neurondb implements WatchableValueInterface<IValue> {
+export class Neurondb extends CompoundTrackable implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
   private _value: IValue;
   // private emptyTextArea: IValue;
 
   constructor() {
     // maybe you can add to same dictionary instead of array of dictionary
+    super();
     let textArea: IValue = {};
     textArea['dbNeuronPrefix']= '';
     textArea['dbFindAnnotator']='';
