@@ -65,15 +65,14 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
    * Resets all values to either an empty string or 0.
    */
   reset() {
-   // let empty: IValue = {};
-   //
-   // empty['set_color_val']='';
-   // empty['clNeuronColor']='';
-   // empty['clAlsoLoadNeurons']='0';
-   // empty['clClearBeforeLoad']='0';
-   // this._value = empty;
-   // this.changed.dispatch();
-    super.reset();
+   let empty: IValue = {};
+
+   empty['set_color_val']='';
+   empty['clNeuronColor']='';
+   empty['clAlsoLoadNeurons']='0';
+   empty['clClearBeforeLoad']='0';
+   this._value = empty;
+   this.changed.dispatch();
   }
 
   /**
@@ -109,19 +108,17 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
   }
 
   restoreState(x: IValue) {
-    // if (x == null) {
-    //   this.reset();
-    //   return;
-    // }
-    //
-    // try {
-    //   this._value = x;
-    //   this.changed.dispatch();
-    // } catch(ignoredError) {
-    //   this.reset();
-    // }
+    if (x == null) {
+      this.reset();
+      return;
+    }
 
-    super.restoreState(x);
+    try {
+      this._value = x;
+      this.changed.dispatch();
+    } catch(ignoredError) {
+      this.reset();
+    }
 
   }
 }
