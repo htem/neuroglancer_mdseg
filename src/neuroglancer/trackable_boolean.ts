@@ -36,10 +36,10 @@ export class TrackableBoolean implements Trackable {
   changed = new NullarySignal();
   constructor(private value_: boolean, public defaultValue: boolean = value_) {}
   toJSON() {
-    let {value_} = this;
-    if (value_ === this.defaultValue) {
-      return undefined;
-    }
+    // let {value_} = this;
+    // if (value_ === this.defaultValue) {
+    //   return undefined;
+    // }
     return this.value_;
   }
   restoreState(x: any) {
