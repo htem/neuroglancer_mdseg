@@ -141,6 +141,7 @@ getKeyByValue(object:Map<string, HTMLElement>, value:HTMLElement) {
    * Updates the view of a tab using the tab's model.
    */
   updateView() {
+    console.log('updateView called');
     for (let [key, value] of this.model.children) {
       let field = this.m.get(key)!;
       // let txt = this.model.children.get(key);
