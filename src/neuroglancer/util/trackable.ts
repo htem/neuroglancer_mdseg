@@ -50,6 +50,7 @@ export class CompoundTrackable extends RefCounted implements Trackable {
     this.children.set(key, value);
     value.changed.add(this.changed.dispatch);
     this.changed.dispatch();
+    console.log(value + ' added');
     return () => {
       this.remove(key);
     };
