@@ -143,6 +143,7 @@ getKeyByValue(object:Map<string, HTMLElement>, value:HTMLElement) {
   updateView() {
     console.log('updateView called');
     for (let [key, value] of this.model.children) {
+      console.log(key + '' + value);
       let field = this.m.get(key)!;
       // let txt = this.model.children.get(key);
       if (field.nodeName === 'TEXTAREA') {
