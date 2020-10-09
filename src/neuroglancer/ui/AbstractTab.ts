@@ -146,9 +146,9 @@ getKeyByValue(object:Map<string, HTMLElement>, value:HTMLElement) {
       console.log(key + '' + value);
       let field = this.m.get(key)!;
       // let txt = this.model.children.get(key);
-      if (field.nodeName === 'TEXTAREA') {
+      if (field.tagName === 'TEXTAREA') {
         (<HTMLTextAreaElement>field).value = ''+value;
-      } else if(field.nodeName === 'INPUT') {
+      } else if(field.tagName === 'INPUT') {
         if((<TrackableBoolean>value).value) {
           console.log(key + ' is checked');
           (<HTMLInputElement>field).checked = true;
