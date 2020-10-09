@@ -21,6 +21,7 @@
 import './coordinate_transform.css';
 import {Color} from 'neuroglancer/color';
 import {Atab} from 'neuroglancer/ui/AbstractTab';
+import {TrackableBoolean, TrackableBooleanCheckbox} from 'neuroglancer/trackable_boolean';
 
 /**
  * View for the Color tab.
@@ -50,17 +51,29 @@ export class ColorTab extends Atab {
     const {element} = this;
     element.classList.add('neuroglancer-Color-widget');
 
-    this.addTextField(this.set_color_val,'Color value','H3');
-    this.addInputElement(this.clSetVal,'Set color to selections','button','clSetVal');
-    this.addInputElement(this.clClear,'Clear colors','button','clClear');
-    this.addTextField(this.clNeuronColor,'Neuron color mapping','H3', 14, 28);
-    this.addInputElement(this.clNeuronColorButton,'Set color','button','clNeuronColorButton');
-    this.addInputElement(this.clAlsoLoadNeurons,'Also load neurons');
-    this.addInputElement(this.clClearBeforeLoad,'Clear segments before load');
+    // this.addTextField(this.set_color_val,'Color value','H3');
+    // this.addInputElement(this.clSetVal,'Set color to selections','button','clSetVal');
+    // this.addInputElement(this.clClear,'Clear colors','button','clClear');
+    // this.addTextField(this.clNeuronColor,'Neuron color mapping','H3', 14, 28);
+    // this.addInputElement(this.clNeuronColorButton,'Set color','button','clNeuronColorButton');
+    // this.addInputElement(this.clAlsoLoadNeurons,'Also load neurons');
+    // this.addInputElement(this.clClearBeforeLoad,'Clear segments before load');
+    this.addCheckbox('clAlsoLoadNeurons', transform.clAlsoLoadNeurons);
+    this.addCheckbox('clClearBeforeLoad', transform.clClearBeforeLoad);
 
     this.updateView();
   }
 
+
+  addCheckbox = (label: string, value: TrackableBoolean) => {
+    const div_inpArea = document.createElement('DIV');
+    div_inpArea.setAttribute('align','right');
+    const labelElement = document.createElement('label');
+    labelElement.textContent = label;
+    const checkbox = this.registerDisposer(new TrackableBooleanCheckbox(value));
+    labelElement.appendChild(checkbox.element);
+    div_inpArea.appendChild(labelElement);
+  }
 
   /**
    * Uses the values in the text boxes and checkboxes to update the model for the Color tab.

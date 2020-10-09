@@ -2,6 +2,7 @@
 
 import {WatchableValueInterface} from 'neuroglancer/trackable_value';
 import {Tab} from 'neuroglancer/widget/tab_view';
+import {TrackableBoolean, TrackableBooleanCheckbox} from 'neuroglancer/trackable_boolean';
 
 type titleType = 'H3' | 'label';
 type buttonType = 'checkbox'|'button';
@@ -36,10 +37,10 @@ export abstract class Atab extends Tab {
     input.type = type;
 
     if(type === 'checkbox') {
-        const inputlabel = document.createElement('label');
-        inputlabel.textContent=title;
-        inputlabel.appendChild(input);
-        div_inpArea.appendChild(inputlabel);
+      const inputlabel = document.createElement('label');
+      inputlabel.textContent = title;
+      inputlabel.appendChild(input);
+      div_inpArea.appendChild(inputlabel);
     } else {
       input.name = title;
       input.value = title;

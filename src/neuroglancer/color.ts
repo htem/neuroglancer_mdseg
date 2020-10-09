@@ -15,7 +15,7 @@
  */
 import {WatchableValueInterface} from 'neuroglancer/trackable_value';
 import {NullarySignal} from 'neuroglancer/util/signal';
-import {TrackableBoolean} from 'neuroglancer/trackable_boolean';
+import {TrackableBoolean, TrackableBooleanCheckbox} from 'neuroglancer/trackable_boolean';
 import {CompoundTrackable} from 'neuroglancer/util/trackable';
 
 
@@ -108,6 +108,17 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
 
     return super.toJSON();
   }
+
+
+  // addCheckbox = (label: string, value: TrackableBoolean) => {
+  //   const div_inpArea = document.createElement('DIV');
+  //   div_inpArea.setAttribute('align','right');
+  //   const labelElement = document.createElement('label');
+  //   labelElement.textContent = label;
+  //   const checkbox = this.registerDisposer(new TrackableBooleanCheckbox(value));
+  //   labelElement.appendChild(checkbox.element);
+  //   div_inpArea.appendChild(labelElement);
+  // }
 
   restoreState(x: IValue) {
     if (x == null) {
