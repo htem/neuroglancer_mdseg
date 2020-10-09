@@ -45,6 +45,7 @@ export class ColorTab extends Atab {
     this.m.set('clSetVal',this.clSetVal);
     this.m.set('clClear',this.clClear);
     this.m.set('clNeuronColor',this.clNeuronColor);
+    this.m.set('clNeuronColorButton', this.clNeuronColorButton)
     this.m.set('clAlsoLoadNeurons',this.clAlsoLoadNeurons);
     this.m.set('clClearBeforeLoad',this.clClearBeforeLoad);
 

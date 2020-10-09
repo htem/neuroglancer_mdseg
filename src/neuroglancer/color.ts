@@ -15,7 +15,7 @@
  */
 import {WatchableValueInterface} from 'neuroglancer/trackable_value';
 import {NullarySignal} from 'neuroglancer/util/signal';
-import {TrackableBoolean, TrackableBooleanCheckbox} from 'neuroglancer/trackable_boolean';
+import {TrackableBoolean} from 'neuroglancer/trackable_boolean';
 import {CompoundTrackable} from 'neuroglancer/util/trackable';
 
 
