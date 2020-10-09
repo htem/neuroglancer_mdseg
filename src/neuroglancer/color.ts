@@ -15,6 +15,8 @@
  */
 import {WatchableValueInterface} from 'neuroglancer/trackable_value';
 import {NullarySignal} from 'neuroglancer/util/signal';
+import {TrackableBoolean} from 'neuroglancer/trackable_boolean';
+import {CompoundTrackable} from 'neuroglancer/util/trackable';
 
 
 
@@ -26,21 +28,29 @@ export interface IValue {
 /**
  * Model for the Color tab. Keeps track of the state of text boxes and checkboxes in the Color tab.
  */
-export class Color implements WatchableValueInterface<IValue> {
+export class Color extends CompoundTrackable implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
+
+  clClearBeforeLoad = new TrackableBoolean(false, false);
+  clAlsoLoadNeurons = new TrackableBoolean(false, false);
+
 
   private _value: IValue;
   // private emptyTextArea: IValue;
 
   constructor() {
-    // maybe you can add to same dictionary instead of array of dictionary
-    let textArea: IValue = {};
-    textArea['set_color_val']='';
-    textArea['clNeuronColor']='';
-    textArea['clAlsoLoadNeurons']='0';
-    textArea['clClearBeforeLoad']='0';
+    super();
+    this.add('clClearBeforeLoad', this.clClearBeforeLoad);
+    this.add('clAlsoLoadNeurons', this.clAlsoLoadNeurons);
 
-    this._value =textArea;
+    // maybe you can add to same dictionary instead of array of dictionary
+    // let textArea: IValue = {};
+    // textArea['set_color_val']='';
+    // textArea['clNeuronColor']='';
+    // textArea['clAlsoLoadNeurons']='0';
+    // textArea['clClearBeforeLoad']='0';
+    //
+    // this._value =textArea;
     // this.emptyTextArea = textArea;
   }
 
@@ -70,21 +80,21 @@ export class Color implements WatchableValueInterface<IValue> {
    */
   toJSON() {
     console.log('color value: ' + JSON.stringify(this._value));
-    let result: IValue = {};
-    for(let key in this._value) {
-      let label = key;
-      let value = this._value[key];
-
-      if(value !== '' &&
-          label !== 'clAlsoLoadNeurons' &&
-          label !== 'clClearBeforeLoad' ||
-          ((label === 'clAlsoLoadNeurons' && value === '1') ||
-              (label === 'clClearBeforeLoad' && value === '1'))) {
-        result[label] = value;
-      }
-    }
-    console.log('result in toJSON (color): ' + JSON.stringify(result));
-    return result;
+    // let result: IValue = {};
+    // for(let key in this._value) {
+    //   let label = key;
+    //   let value = this._value[key];
+    //
+    //   if(value !== '' &&
+    //       label !== 'clAlsoLoadNeurons' &&
+    //       label !== 'clClearBeforeLoad' ||
+    //       ((label === 'clAlsoLoadNeurons' && value === '1') ||
+    //           (label === 'clClearBeforeLoad' && value === '1'))) {
+    //     result[label] = value;
+    //   }
+    // }
+    // console.log('result in toJSON (color): ' + JSON.stringify(result));
+    // return result;
 
     // if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
     //   return {};
@@ -92,6 +102,8 @@ export class Color implements WatchableValueInterface<IValue> {
     //   return this._value;
     // }
     // return this._value;
+
+    return super.toJSON();
   }
 
   restoreState(x: IValue) {

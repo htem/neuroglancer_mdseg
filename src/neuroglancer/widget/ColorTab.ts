@@ -27,6 +27,8 @@ import {Atab} from 'neuroglancer/ui/AbstractTab';
  */
 export class ColorTab extends Atab {
 
+  m:Map<string,HTMLElement> = new Map();
+
   private set_color_val = document.createElement('textarea');
   private clSetVal = document.createElement('input');
   private clClear = document.createElement('input');
