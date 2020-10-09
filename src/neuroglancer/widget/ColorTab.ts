@@ -69,6 +69,8 @@ export class ColorTab extends Atab {
   addCheckbox = (label: string, value: TrackableBoolean) => {
     // const div_inpArea = document.createElement('DIV');
     // div_inpArea.setAttribute('align','right');
+    this.m.set(label, document.createElement('input'));
+
     const labelElement = document.createElement('label');
     labelElement.textContent = label;
     const checkbox = this.registerDisposer(new TrackableBooleanCheckbox(value));

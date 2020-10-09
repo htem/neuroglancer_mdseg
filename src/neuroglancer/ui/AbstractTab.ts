@@ -1,7 +1,9 @@
 
 
-import {WatchableValueInterface} from 'neuroglancer/trackable_value';
+// import {WatchableValueInterface} from 'neuroglancer/trackable_value';
 import {Tab} from 'neuroglancer/widget/tab_view';
+import {CompoundTrackable} from 'neuroglancer/util/trackable';
+import {TrackableBoolean} from 'neuroglancer/trackable_boolean';
 
 type titleType = 'H3' | 'label';
 type buttonType = 'checkbox'|'button';
@@ -17,9 +19,12 @@ export abstract class Atab extends Tab {
 
     m:Map<string,HTMLElement> = new Map();
 
-    constructor(public model: WatchableValueInterface<IValue>) {
-        super();
-    }
+    // constructor(public model: WatchableValueInterface<IValue>) {
+    //     super();
+    // }
+  constructor(public model: CompoundTrackable) {
+    super();
+  }
 
   /**
    * Adds an HTML input element to the tab.
@@ -137,13 +142,13 @@ getKeyByValue(object:Map<string, HTMLElement>, value:HTMLElement) {
    * Updates the view of a tab using the tab's model.
    */
   updateView() {
-    for (let key in this.model.value) {
+    for (let [key, value] of this.model.children) {
       let field = this.m.get(key)!;
-      let txt = this.model.value[key];
+      // let txt = this.model.children.get(key);
       if (field.nodeName === 'TEXTAREA') {
-        (<HTMLTextAreaElement>field).value = ''+txt;
+        (<HTMLTextAreaElement>field).value = ''+value;
       } else if(field.nodeName === 'INPUT' && (<HTMLInputElement>field).type === 'checkbox') {
-        if(txt === '1') {
+        if((<TrackableBoolean>value).value) {
           (<HTMLInputElement>field).checked = true;
         } else {
           (<HTMLInputElement>field).checked = false;
