@@ -16,7 +16,7 @@
 import {WatchableValueInterface} from 'neuroglancer/trackable_value';
 import {NullarySignal} from 'neuroglancer/util/signal';
 import {TrackableBoolean} from 'neuroglancer/trackable_boolean';
-import {CompoundTrackable, Trackable} from 'neuroglancer/util/trackable';
+import {CompoundTrackable} from 'neuroglancer/util/trackable';
 
 
 
@@ -31,8 +31,6 @@ export interface IValue {
 export class Color extends CompoundTrackable implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
 
-  children = new Map<string, Trackable>();
-
   clClearBeforeLoad = new TrackableBoolean(false, false);
   clAlsoLoadNeurons = new TrackableBoolean(false, false);
 
@@ -46,18 +44,15 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
     super.add('clClearBeforeLoad', this.clClearBeforeLoad);
     super.add('clAlsoLoadNeurons', this.clAlsoLoadNeurons);
 
-    this.children.set('clClearBeforeLoad', this.clClearBeforeLoad);
-    this.children.set('clAlsoLoadNeurons', this.clAlsoLoadNeurons);
-
 
     // maybe you can add to same dictionary instead of array of dictionary
-    // let textArea: IValue = {};
-    // textArea['set_color_val']='';
-    // textArea['clNeuronColor']='';
-    // textArea['clAlsoLoadNeurons']='0';
-    // textArea['clClearBeforeLoad']='0';
-    //
-    // this._value =textArea;
+    let textArea: IValue = {};
+    textArea['set_color_val']='';
+    textArea['clNeuronColor']='';
+    textArea['clAlsoLoadNeurons']='0';
+    textArea['clClearBeforeLoad']='0';
+
+    this._value = textArea;
     // this.emptyTextArea = textArea;
   }
 
@@ -129,8 +124,8 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
   // }
 
   restoreState(x: any) {
-    console.log('color restoreState called');
-    super.restoreState(x);
+    console.log('color restoreState called ' + x);
+    super.restoreState(this._value);
     // if (x == null) {
     //   this.reset();
     //   return;
