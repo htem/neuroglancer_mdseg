@@ -33,11 +33,12 @@ export interface UserLayerWithColor extends UserLayer {
 export function UserLayerWithColorMixin<TBase extends {new (...args: any[]): UserLayer}>(
     Base: TBase) {
   class C extends Base implements UserLayerWithColor {
-    cl = new Color();
+    cl: Color;
 
 
     constructor(...args: any[]) {
       super(...args);
+      this.cl = new Color();
 
       this.cl.changed.add(this.specificationChanged.dispatch);
       this.tabs.add(COLOR_TAB_NAME, {
