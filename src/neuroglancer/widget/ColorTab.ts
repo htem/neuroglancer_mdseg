@@ -59,8 +59,8 @@ export class ColorTab extends Atab {
     // this.addInputElement(this.clNeuronColorButton,'Set color','button','clNeuronColorButton');
     // this.addInputElement(this.clAlsoLoadNeurons,'Also load neurons');
     // this.addInputElement(this.clClearBeforeLoad,'Clear segments before load');
-    this.addCheckbox('clAlsoLoadNeurons', transform.state.clAlsoLoadNeurons);
-    this.addCheckbox('clClearBeforeLoad', transform.state.clClearBeforeLoad);
+    this.addCheckbox('clAlsoLoadNeurons', transform.clAlsoLoadNeurons);
+    this.addCheckbox('clClearBeforeLoad', transform.clClearBeforeLoad);
 
     this.updateView();
   }

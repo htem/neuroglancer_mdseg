@@ -31,8 +31,8 @@ export interface IValue {
 export class Color extends CompoundTrackable implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
 
-  // clClearBeforeLoad = new TrackableBoolean(false, false);
-  // clAlsoLoadNeurons = new TrackableBoolean(false, false);
+  clClearBeforeLoad = new TrackableBoolean(false, false);
+  clAlsoLoadNeurons = new TrackableBoolean(false, false);
 
 
   private _value: IValue;
@@ -40,8 +40,8 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
 
 
   state = {
-    clClearBeforeLoad: new TrackableBoolean(false, false),
-    clAlsoLoadNeurons: new TrackableBoolean(false, false)
+    clClearBeforeLoad: this.clClearBeforeLoad,
+    clAlsoLoadNeurons: this.clAlsoLoadNeurons
   };
 
 
