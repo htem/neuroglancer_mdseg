@@ -34,6 +34,7 @@ export class Neurondb extends CompoundTrackable implements WatchableValueInterfa
   constructor() {
     // maybe you can add to same dictionary instead of array of dictionary
     super();
+    console.log('constructing new neurondb');
     let textArea: IValue = {};
     textArea['dbNeuronPrefix']= '';
     textArea['dbFindAnnotator']='';

@@ -35,6 +35,7 @@ export class Proofread extends CompoundTrackable implements WatchableValueInterf
 
   constructor() {
     super();
+    console.log('constructing new pr');
     // maybe you can add to same dictionary instead of array of dictionary
     let textArea: IValue = {};
     textArea['prNeuronName']= '';
