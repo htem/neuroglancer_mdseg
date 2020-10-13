@@ -89,7 +89,7 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
   toJSON() {
     console.log('color value: ' + JSON.stringify(this._value));
     console.log('compund trackable children (super): ' + JSON.stringify(super.children));
-    console.log('compund trackable children (this): ' + JSON.stringify(this.children));
+    console.log('compund trackable children (this): ' + this.children);
 
     // let result: IValue = {};
     // for(let key in this._value) {
