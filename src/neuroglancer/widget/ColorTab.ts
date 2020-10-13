@@ -23,7 +23,6 @@ import {Color} from 'neuroglancer/color';
 import {Atab} from 'neuroglancer/ui/AbstractTab';
 import {TrackableBoolean, TrackableBooleanCheckbox} from 'neuroglancer/trackable_boolean';
 import {TrackableValue} from 'neuroglancer/trackable_value';
-import {NumberInputWidget} from 'neuroglancer/widget/number_input_widget';
 import {StringInputWidget} from 'neuroglancer/widget/string_input_widget';
 
 /**
