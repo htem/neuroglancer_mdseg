@@ -123,6 +123,7 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
   // }
 
   restoreState(x: any) {
+    console.log('color restoreState called');
     // super.restoreState(x);
     if (x == null) {
       this.reset();
@@ -130,7 +131,7 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
     }
 
     try {
-      this._value = x;
+      this.children = x;
       this.changed.dispatch();
     } catch(ignoredError) {
       this.reset();
