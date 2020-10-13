@@ -46,11 +46,12 @@ export function UserLayerWithColorMixin<TBase extends {new (...args: any[]): Use
         order: 100,
         getter: () => new ColorTab(this.cl)
       });
-      // const specification = args[1];
       console.log(JSON.stringify(args));
-      // this.cl.restoreState(specification[COLOR_KEY]);
-      console.log('children in color mixin: ' + JSON.stringify(this.cl.children));
-      this.cl.restoreState(this.cl.children);
+      const specification = args[1];
+      this.cl.restoreState(specification[COLOR_KEY]);
+
+      // console.log('children in color mixin: ' + JSON.stringify(this.cl.children));
+      // this.cl.restoreState(this.cl.children);
 
 
     }
