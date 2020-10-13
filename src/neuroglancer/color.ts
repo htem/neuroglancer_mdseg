@@ -38,6 +38,13 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
   private _value: IValue;
   // private emptyTextArea: IValue;
 
+
+  state = {
+    clClearBeforeLoad: undefined,
+    clAlsoLoadNeurons: undefined
+  };
+
+
   constructor() {
     super();
     console.log('constructing new color model');
@@ -124,8 +131,8 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
   // }
 
   restoreState(x: any) {
-    console.log('color restoreState called');
-    super.restoreState(x);
+    console.log('color restoreState called' + x);
+    super.restoreState(this.state);
     // if (x == null) {
     //   this.reset();
     //   return;
