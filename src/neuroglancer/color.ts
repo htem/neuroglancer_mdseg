@@ -46,13 +46,13 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
 
 
     // maybe you can add to same dictionary instead of array of dictionary
-    let textArea: IValue = {};
-    textArea['set_color_val']='';
-    textArea['clNeuronColor']='';
-    textArea['clAlsoLoadNeurons']='0';
-    textArea['clClearBeforeLoad']='0';
-
-    this._value = textArea;
+    // let textArea: IValue = {};
+    // textArea['set_color_val']='';
+    // textArea['clNeuronColor']='';
+    // textArea['clAlsoLoadNeurons']='0';
+    // textArea['clClearBeforeLoad']='0';
+    //
+    // this._value =textArea;
     // this.emptyTextArea = textArea;
   }
 
@@ -124,8 +124,8 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
   // }
 
   restoreState(x: any) {
-    console.log('color restoreState called ' + x);
-    super.restoreState(this._value);
+    console.log('color restoreState called');
+    super.restoreState(x);
     // if (x == null) {
     //   this.reset();
     //   return;
