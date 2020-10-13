@@ -40,6 +40,7 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
 
   constructor() {
     super();
+    console.log('constructing new color model');
     super.add('clClearBeforeLoad', this.clClearBeforeLoad);
     super.add('clAlsoLoadNeurons', this.clAlsoLoadNeurons);
 
