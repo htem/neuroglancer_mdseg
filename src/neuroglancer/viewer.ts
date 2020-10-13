@@ -359,6 +359,7 @@ export class Viewer extends RefCounted implements ViewerState {
 
   constructor(public display: DisplayContext, options: Partial<ViewerOptions> = {}) {
     super();
+    console.log('CONSTRUCTING NEW VIEWER');
 
     const {
       dataContext = new DataManagementContext(display.gl, display, options.bundleRoot),
