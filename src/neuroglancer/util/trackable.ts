@@ -97,7 +97,6 @@ export class CompoundTrackable extends RefCounted implements Trackable {
   restoreState(x: any) {
     verifyObject(x);
     for (let [key, value] of this.children) {
-      console.log(key + ' ' + value);
       try {
         if (x.hasOwnProperty(key)) {
           const subValue = x[key];

@@ -31,8 +31,8 @@ export interface IValue {
 export class Color extends CompoundTrackable implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
 
-  clClearBeforeLoad = new TrackableBoolean(false, false);
-  clAlsoLoadNeurons = new TrackableBoolean(false, false);
+  // clClearBeforeLoad = new TrackableBoolean(false, false);
+  // clAlsoLoadNeurons = new TrackableBoolean(false, false);
 
 
   private _value: IValue;
@@ -40,16 +40,16 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
 
 
   state = {
-    clClearBeforeLoad: undefined,
-    clAlsoLoadNeurons: undefined
+    clClearBeforeLoad: new TrackableBoolean(false, false),
+    clAlsoLoadNeurons: new TrackableBoolean(false, false)
   };
 
 
   constructor() {
     super();
     console.log('constructing new color model');
-    super.add('clClearBeforeLoad', this.clClearBeforeLoad);
-    super.add('clAlsoLoadNeurons', this.clAlsoLoadNeurons);
+    super.add('clClearBeforeLoad', this.state.clClearBeforeLoad);
+    super.add('clAlsoLoadNeurons', this.state.clAlsoLoadNeurons);
 
 
     // maybe you can add to same dictionary instead of array of dictionary
