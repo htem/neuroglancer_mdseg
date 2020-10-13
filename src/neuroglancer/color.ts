@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {WatchableValueInterface} from 'neuroglancer/trackable_value';
+import {TrackableValue, WatchableValueInterface} from 'neuroglancer/trackable_value';
 import {NullarySignal} from 'neuroglancer/util/signal';
 import {TrackableBoolean} from 'neuroglancer/trackable_boolean';
 import {CompoundTrackable} from 'neuroglancer/util/trackable';
+import {verifyString} from 'neuroglancer/util/json';
 
 
 
@@ -31,6 +32,7 @@ export interface IValue {
 export class Color extends CompoundTrackable implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
 
+  set_color_val = new TrackableValue('', verifyString,'');
   clClearBeforeLoad = new TrackableBoolean(false, false);
   clAlsoLoadNeurons = new TrackableBoolean(false, false);
 
@@ -40,6 +42,7 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
 
 
   state = {
+    set_color_val: this.set_color_val,
     clClearBeforeLoad: this.clClearBeforeLoad,
     clAlsoLoadNeurons: this.clAlsoLoadNeurons
   };
@@ -48,6 +51,7 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
   constructor() {
     super();
     console.log('constructing new color model');
+    super.add('set_color_val', this.state.set_color_val);
     super.add('clClearBeforeLoad', this.state.clClearBeforeLoad);
     super.add('clAlsoLoadNeurons', this.state.clAlsoLoadNeurons);
 

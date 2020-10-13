@@ -22,6 +22,9 @@ import './coordinate_transform.css';
 import {Color} from 'neuroglancer/color';
 import {Atab} from 'neuroglancer/ui/AbstractTab';
 import {TrackableBoolean, TrackableBooleanCheckbox} from 'neuroglancer/trackable_boolean';
+import {TrackableValue} from 'neuroglancer/trackable_value';
+import {NumberInputWidget} from 'neuroglancer/widget/number_input_widget';
+import {StringInputWidget} from 'neuroglancer/widget/string_input_widget';
 
 /**
  * View for the Color tab.
@@ -59,6 +62,7 @@ export class ColorTab extends Atab {
     // this.addInputElement(this.clNeuronColorButton,'Set color','button','clNeuronColorButton');
     // this.addInputElement(this.clAlsoLoadNeurons,'Also load neurons');
     // this.addInputElement(this.clClearBeforeLoad,'Clear segments before load');
+    this.addTextArea('set_color_val', transform.set_color_val);
     this.addCheckbox('clAlsoLoadNeurons', transform.clAlsoLoadNeurons);
     this.addCheckbox('clClearBeforeLoad', transform.clClearBeforeLoad);
 
@@ -75,6 +79,17 @@ export class ColorTab extends Atab {
     labelElement.textContent = label;
     const checkbox = this.registerDisposer(new TrackableBooleanCheckbox(value));
     labelElement.appendChild(checkbox.element);
+    this.element.appendChild(labelElement);
+  }
+
+  addTextArea = (label: string, value: TrackableValue<string>) => {
+    this.m.set(label, document.createElement('textarea'));
+
+    const labelElement = document.createElement('label');
+    labelElement.textContent = label;
+
+    const inputField = this.registerDisposer(new StringInputWidget(value));
+    labelElement.appendChild(inputField.element);
     this.element.appendChild(labelElement);
   }
 
