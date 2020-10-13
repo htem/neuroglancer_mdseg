@@ -16,7 +16,7 @@
 import {WatchableValueInterface} from 'neuroglancer/trackable_value';
 import {NullarySignal} from 'neuroglancer/util/signal';
 import {TrackableBoolean} from 'neuroglancer/trackable_boolean';
-import {CompoundTrackable} from 'neuroglancer/util/trackable';
+import {CompoundTrackable, Trackable} from 'neuroglancer/util/trackable';
 
 
 
@@ -30,6 +30,8 @@ export interface IValue {
  */
 export class Color extends CompoundTrackable implements WatchableValueInterface<IValue> {
   changed = new NullarySignal();
+
+  children = new Map<string, Trackable>();
 
   clClearBeforeLoad = new TrackableBoolean(false, false);
   clAlsoLoadNeurons = new TrackableBoolean(false, false);
