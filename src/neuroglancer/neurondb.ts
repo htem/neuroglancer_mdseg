@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {TrackableValue, WatchableValueInterface} from 'neuroglancer/trackable_value';
+import {TrackableValue} from 'neuroglancer/trackable_value';
 import {NullarySignal} from 'neuroglancer/util/signal';
 import {CompoundTrackable} from 'neuroglancer/util/trackable';
 import {verifyString} from 'neuroglancer/util/json';
@@ -28,10 +28,8 @@ export interface IValue {
 /**
  * Model for the Search DB tab. Keeps track of the state of text boxes and checkboxes in the Search DB tab.
  */
-export class Neurondb extends CompoundTrackable implements WatchableValueInterface<IValue> {
+export class Neurondb extends CompoundTrackable {
   changed = new NullarySignal();
-  private _value: IValue;
-  // private emptyTextArea: IValue;
 
   dbNeuronPrefix = new TrackableValue('', verifyString,'');
   dbFindAnnotator = new TrackableValue('', verifyString,'');
@@ -78,15 +76,9 @@ export class Neurondb extends CompoundTrackable implements WatchableValueInterfa
     super.add('dbLoadWithoutChildren', this.dbLoadWithoutChildren);
   }
 
-  /**
-   * Getter for _value.
-   */
-  get value() {
-    return this._value;
-  }
 
   /**
-   * Resets all values to either an empty string or 0.
+   * Resets all values to their default values.
    */
   reset() {
     super.reset();
@@ -99,6 +91,10 @@ export class Neurondb extends CompoundTrackable implements WatchableValueInterfa
     return super.toJSON();
   }
 
+  /**
+   * Restores the state of the Search DB to the provided state.
+   * @param x The state in which to restore the Search DB state to.
+   */
   restoreState(x: any) {
     if (x == null) {
       // this.reset();

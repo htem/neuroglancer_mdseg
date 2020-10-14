@@ -49,11 +49,6 @@ export function UserLayerWithColorMixin<TBase extends {new (...args: any[]): Use
       console.log(JSON.stringify(args));
       const specification = args[1];
       this.cl.restoreState(specification[COLOR_KEY]);
-
-      // console.log('children in color mixin: ' + JSON.stringify(this.cl.children));
-      // this.cl.restoreState(this.cl.children);
-
-
     }
     toJSON(): any {
       const x = super.toJSON();
