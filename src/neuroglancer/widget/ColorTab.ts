@@ -63,7 +63,7 @@ export class ColorTab extends Atab {
     // this.addInputElement(this.clClearBeforeLoad,'Clear segments before load');
 
     this.addTextArea('Color value', transform.set_color_val);
-    this.addTextArea('Neuron color mapping', transform.clNeuronColor);
+    this.addTextArea('Neuron color mapping', transform.clNeuronColor, 14, 28);
     this.addCheckbox('Also load neurons', transform.clAlsoLoadNeurons);
     this.addCheckbox('Clear segments before load', transform.clClearBeforeLoad);
 
@@ -72,18 +72,23 @@ export class ColorTab extends Atab {
 
 
   addCheckbox = (label: string, value: TrackableBoolean) => {
-    // const div_inpArea = document.createElement('DIV');
-    // div_inpArea.setAttribute('align','right');
+    const linebreak = document.createElement('br');
+    const div_inpArea = document.createElement('DIV');
+    div_inpArea.setAttribute('align','right');
+
     this.m.set(label, document.createElement('input'));
 
     const labelElement = document.createElement('label');
     labelElement.textContent = label;
     const checkbox = this.registerDisposer(new TrackableBooleanCheckbox(value));
     labelElement.appendChild(checkbox.element);
-    this.element.appendChild(labelElement);
+    div_inpArea.appendChild(labelElement);
+    div_inpArea.appendChild(linebreak);
+    div_inpArea.appendChild(linebreak);
+    this.element.appendChild(div_inpArea);
   }
 
-  addTextArea = (label: string, value: TrackableValue<string>) => {
+  addTextArea = (label: string, value: TrackableValue<string>, rows:number=1, cols:number=24) => {
     this.m.set(label, document.createElement('textarea'));
 
     const div_textArea = document.createElement('DIV');
@@ -94,7 +99,7 @@ export class ColorTab extends Atab {
     labelElement.style.padding = '0';
     labelElement.style.margin='0';
 
-    const inputField = this.registerDisposer(new StringInputWidget(value));
+    const inputField = this.registerDisposer(new StringInputWidget(value, rows, cols));
     labelElement.appendChild(inputField.element);
     div_textArea.appendChild(labelElement);
     this.element.appendChild(div_textArea);

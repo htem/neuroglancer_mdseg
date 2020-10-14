@@ -20,9 +20,10 @@ import {removeFromParent} from 'neuroglancer/util/dom';
 
 export class StringInputWidget extends RefCounted {
   element = document.createElement('label');
-  inputElement = document.createElement('input');
+  inputElement = document.createElement('textarea');
   validator: (x: string) => string;
-  constructor(public model: WatchableValue<string>, options: {
+
+  constructor(public model: WatchableValue<string>, rows: number, cols: number, options: {
     validator?: (x: string) => string,
     label?: string
   } = {}) {
@@ -41,8 +42,10 @@ export class StringInputWidget extends RefCounted {
       element.textContent = label;
     }
     element.appendChild(inputElement);
-    element.className = 'neuroglancer-number-input';
-    inputElement.type = 'input';
+    element.className = 'neuroglancer-string-input';
+    inputElement.rows = rows;
+    inputElement.cols = cols;
+    // inputElement.type = 'input';
     this.registerDisposer(this.model.changed.add(() => this.updateView()));
     this.registerEventListener(inputElement, 'change', () => this.updateModel());
     this.updateView();
