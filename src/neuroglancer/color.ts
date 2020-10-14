@@ -151,7 +151,6 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
       super.restoreState(this.state);
       this.changed.dispatch();
     } catch(ignoredError) {
-      console.log('ERROR IN COLOR RESTORE STATE');
       this.reset();
     }
 
