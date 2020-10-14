@@ -142,23 +142,23 @@ getKeyByValue(object:Map<string, HTMLElement>, value:HTMLElement) {
    */
   updateView() {
     console.log('updateView called');
-    for (let [key, value] of this.model.children) {
-      console.log(key + '' + value);
-      let field = this.m.get(key)!;
-      // let txt = this.model.children.get(key);
-      if (field.tagName === 'TEXTAREA') {
-        (<HTMLTextAreaElement>field).value = ''+value;
-      } else if(field.tagName === 'INPUT') {
-        console.log('updateView: field is input');
-        console.log('value is: ' + (<TrackableBoolean>value).value);
-        if((<TrackableBoolean>value).value) {
-          console.log(key + ' is checked');
-          (<HTMLInputElement>field).checked = true;
-        } else {
-          (<HTMLInputElement>field).checked = false;
-        }
-      }
-    }
+    // for (let [key, value] of this.model.children) {
+    //   console.log(key + '' + value);
+    //   let field = this.m.get(key)!;
+    //   // let txt = this.model.children.get(key);
+    //   if (field.tagName === 'TEXTAREA') {
+    //     (<HTMLTextAreaElement>field).value = ''+value;
+    //   } else if(field.tagName === 'INPUT') {
+    //     console.log('updateView: field is input');
+    //     console.log('value is: ' + (<TrackableBoolean>value).value);
+    //     if((<TrackableBoolean>value).value) {
+    //       console.log(key + ' is checked');
+    //       (<HTMLInputElement>field).checked = true;
+    //     } else {
+    //       (<HTMLInputElement>field).checked = false;
+    //     }
+    //   }
+    // }
   }
 
 

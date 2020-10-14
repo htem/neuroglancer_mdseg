@@ -112,23 +112,23 @@ export class ColorTab extends Atab {
    * Uses the values in the text boxes and checkboxes to update the model for the Color tab.
    */
   updateModel() {
-    try {
-        for (let key in this.transform.value) {
-          let field = this.m.get(key)!;
-          if(field.nodeName === 'TEXTAREA') {
-            this.transform.value[key]= (<HTMLTextAreaElement>field).value;
-          } else if(field.nodeName === 'INPUT' && (<HTMLInputElement>field).type === 'checkbox') {
-
-            if((<HTMLInputElement>field).checked) {
-              this.transform.value[key] = '1';
-              } else {
-              this.transform.value[key] = '0';
-            }
-          }
-        }
-        this.transform.changed.dispatch();
-    } catch {
-      this.updateView();
-    }
+    // try {
+    //     for (let key in this.transform.value) {
+    //       let field = this.m.get(key)!;
+    //       if(field.nodeName === 'TEXTAREA') {
+    //         this.transform.value[key]= (<HTMLTextAreaElement>field).value;
+    //       } else if(field.nodeName === 'INPUT' && (<HTMLInputElement>field).type === 'checkbox') {
+    //
+    //         if((<HTMLInputElement>field).checked) {
+    //           this.transform.value[key] = '1';
+    //           } else {
+    //           this.transform.value[key] = '0';
+    //         }
+    //       }
+    //     }
+    //     this.transform.changed.dispatch();
+    // } catch {
+    //   this.updateView();
+    // }
   }
 }
