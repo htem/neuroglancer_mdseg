@@ -2,7 +2,6 @@
 
 import {Tab} from 'neuroglancer/widget/tab_view';
 import {CompoundTrackable} from 'neuroglancer/util/trackable';
-import {TrackableBoolean} from 'neuroglancer/trackable_boolean';
 
 type titleType = 'H3' | 'label';
 type buttonType = 'checkbox'|'button';
