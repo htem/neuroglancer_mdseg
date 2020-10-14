@@ -21,8 +21,6 @@ import {verifyString} from 'neuroglancer/util/json';
 
 
 
-
-
 /**
  * Model for the Color tab. Keeps track of the state of text boxes and checkboxes in the Color tab.
  */
@@ -34,14 +32,12 @@ export class Color extends CompoundTrackable {
   clClearBeforeLoad = new TrackableBoolean(false, false);
   clAlsoLoadNeurons = new TrackableBoolean(false, false);
 
-
   state = {
     set_color_val: this.set_color_val,
     clNeuronColor: this.clNeuronColor,
     clClearBeforeLoad: this.clClearBeforeLoad,
     clAlsoLoadNeurons: this.clAlsoLoadNeurons
   };
-
 
   constructor() {
     super();
