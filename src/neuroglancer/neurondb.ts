@@ -21,10 +21,6 @@ import {TrackableBoolean} from 'neuroglancer/trackable_boolean';
 
 
 
-export interface IValue {
-  [details: string]: string;
-}
-
 /**
  * Model for the Search DB tab. Keeps track of the state of text boxes and checkboxes in the Search DB tab.
  */
@@ -60,7 +56,6 @@ export class Neurondb extends CompoundTrackable {
   };
 
   constructor() {
-    // maybe you can add to same dictionary instead of array of dictionary
     super();
     super.add('dbNeuronPrefix', this.dbNeuronPrefix);
     super.add('dbFindAnnotator', this.dbFindAnnotator);

@@ -38,7 +38,6 @@ export function UserLayerWithProofreadMixin<TBase extends {new (...args: any[]):
     Base: TBase) {
   class C extends Base implements UserLayerWithProofread {
     pr = new Proofread();
-    // sr = new Neurondb();
 
     constructor(...args: any[]) {
       super(...args);

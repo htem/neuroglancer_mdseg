@@ -13,23 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {TrackableValue, WatchableValueInterface} from 'neuroglancer/trackable_value';
+import {TrackableValue} from 'neuroglancer/trackable_value';
 import {NullarySignal} from 'neuroglancer/util/signal';
 import {CompoundTrackable} from 'neuroglancer/util/trackable';
 import {verifyString} from 'neuroglancer/util/json';
 import {TrackableBoolean} from 'neuroglancer/trackable_boolean';
 
 
-
-
-export interface IValue {
-  [details: string]: string;
-}
-
 /**
  * Model for the Proofread tab. Keeps track of the state of text boxes and checkboxes in the Proofread tab.
  */
-export class Proofread extends CompoundTrackable implements WatchableValueInterface<IValue> {
+export class Proofread extends CompoundTrackable {
   changed = new NullarySignal();
 
   prNeuronName = new TrackableValue('', verifyString,'');
@@ -47,10 +41,6 @@ export class Proofread extends CompoundTrackable implements WatchableValueInterf
   prOverrideConflictCheck = new TrackableBoolean(false, false);
   prGrowThreshold = new TrackableValue('', verifyString,'');
   prSuperGrowThreshold = new TrackableValue('', verifyString,'');
-
-
-  private _value: IValue;
-  // private emptyTextArea: IValue;
 
   state = {
     prNeuronName: this.prNeuronName,
@@ -91,24 +81,23 @@ export class Proofread extends CompoundTrackable implements WatchableValueInterf
   }
 
   /**
-   * Getter for _value.
-   */
-  get value() {
-    return this._value;
-  }
-
-  /**
-   * Resets all values to either an empty string or 0.
+   * Resets all values to their default values.
    */
   reset() {
     super.reset();
   }
 
-
+  /**
+   * Returns the state of the Proofread tab as a JSON.
+   */
   toJSON() {
     return super.toJSON();
   }
 
+  /**
+   * Restores the state of the Proofread tab to the provided state.
+   * @param x The state in which to restore the Proofread tab state to.
+   */
   restoreState(x: any) {
     if (x == null) {
       // this.reset();

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {TrackableValue, WatchableValueInterface} from 'neuroglancer/trackable_value';
+import {TrackableValue} from 'neuroglancer/trackable_value';
 import {NullarySignal} from 'neuroglancer/util/signal';
 import {TrackableBoolean} from 'neuroglancer/trackable_boolean';
 import {CompoundTrackable} from 'neuroglancer/util/trackable';
@@ -22,24 +22,17 @@ import {verifyString} from 'neuroglancer/util/json';
 
 
 
-export interface IValue {
-  [details: string]: string;
-}
 
 /**
  * Model for the Color tab. Keeps track of the state of text boxes and checkboxes in the Color tab.
  */
-export class Color extends CompoundTrackable implements WatchableValueInterface<IValue> {
+export class Color extends CompoundTrackable {
   changed = new NullarySignal();
 
   set_color_val = new TrackableValue('', verifyString,'');
   clNeuronColor = new TrackableValue('', verifyString,'');
   clClearBeforeLoad = new TrackableBoolean(false, false);
   clAlsoLoadNeurons = new TrackableBoolean(false, false);
-
-
-  private _value: IValue;
-  // private emptyTextArea: IValue;
 
 
   state = {
@@ -52,43 +45,16 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
 
   constructor() {
     super();
-    console.log('constructing new color model');
     super.add('set_color_val', this.state.set_color_val);
     super.add('clNeuronColor', this.state.clNeuronColor);
     super.add('clClearBeforeLoad', this.state.clClearBeforeLoad);
     super.add('clAlsoLoadNeurons', this.state.clAlsoLoadNeurons);
-
-
-    // maybe you can add to same dictionary instead of array of dictionary
-    // let textArea: IValue = {};
-    // textArea['set_color_val']='';
-    // textArea['clNeuronColor']='';
-    // textArea['clAlsoLoadNeurons']='0';
-    // textArea['clClearBeforeLoad']='0';
-    //
-    // this._value =textArea;
-    // this.emptyTextArea = textArea;
   }
 
   /**
-   * Getter for _value.
-   */
-  get value() {
-    return this._value;
-  }
-
-  /**
-   * Resets all values to either an empty string or 0.
+   * Resets all values to their default values.
    */
   reset() {
-   // let empty: IValue = {};
-   //
-   // empty['set_color_val']='';
-   // empty['clNeuronColor']='';
-   // empty['clAlsoLoadNeurons']='0';
-   // empty['clClearBeforeLoad']='0';
-   // this._value = empty;
-   // this.changed.dispatch();
     super.reset();
   }
 
@@ -96,50 +62,14 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
    * Returns the state of the Color tab as a JSON.
    */
   toJSON() {
-    console.log('color value: ' + JSON.stringify(this._value));
-    console.log('compund trackable children (super): ' + JSON.stringify(super.children));
-    console.log('compund trackable children (this): ' + this.children);
-
-    // let result: IValue = {};
-    // for(let key in this._value) {
-    //   let label = key;
-    //   let value = this._value[key];
-    //
-    //   if(value !== '' &&
-    //       label !== 'clAlsoLoadNeurons' &&
-    //       label !== 'clClearBeforeLoad' ||
-    //       ((label === 'clAlsoLoadNeurons' && value === '1') ||
-    //           (label === 'clClearBeforeLoad' && value === '1'))) {
-    //     result[label] = value;
-    //   }
-    // }
-    // console.log('result in toJSON (color): ' + JSON.stringify(result));
-    // return result;
-
-    // if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
-    //   return {};
-    // } else {
-    //   return this._value;
-    // }
-    // return this._value;
-
     return super.toJSON();
   }
 
-
-  // addCheckbox = (label: string, value: TrackableBoolean) => {
-  //   const div_inpArea = document.createElement('DIV');
-  //   div_inpArea.setAttribute('align','right');
-  //   const labelElement = document.createElement('label');
-  //   labelElement.textContent = label;
-  //   const checkbox = this.registerDisposer(new TrackableBooleanCheckbox(value));
-  //   labelElement.appendChild(checkbox.element);
-  //   div_inpArea.appendChild(labelElement);
-  // }
-
+  /**
+   * Restores the state of the Color tab to the provided state.
+   * @param x The state in which to restore the Color tab state to.
+   */
   restoreState(x: any) {
-    // super.restoreState(this.state);
-
     if (x == null) {
       // this.reset();
       return;

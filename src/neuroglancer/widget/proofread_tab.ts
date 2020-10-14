@@ -50,34 +50,10 @@ export class ProofreadTab extends Atab {
     this.addCheckbox('Finished', transform.prFinished);
     this.addCheckbox('Reviewed', transform.prReviewed);
     this.addTextArea('Soma Location', transform.prSomaLoc);
-    this.addInputElement(this.prSomaLocCopyLoc, 'Copy Location', 'button', 'prSomaLocCopyLoc');
+    this.addButton(this.prSomaLocCopyLoc, 'Copy Location', 'button', 'prSomaLocCopyLoc');
     this.addCheckbox('Override Set Check', transform.prOverrideSuperSetCheck);
     this.addCheckbox('Override Conflict Check', transform.prOverrideConflictCheck);
     this.addTextArea('Annotator', transform.prAnnotator);
-    this.addInputElement(this.prSaveNeuron, 'Save Neuron', 'button', 'prSaveNeuron');
-  }
-
-  /**
-   * Uses the values in the text boxes and checkboxes to update the model for the Proofread tab.
-   */
-  updateModel() {
-    // try {
-    //   for (let key in this.transform.value) {
-    //     let field = this.m.get(key)!;
-    //     if(field.nodeName === 'TEXTAREA') {
-    //       this.transform.value[key]= (<HTMLTextAreaElement>field).value;
-    //     } else if(field.nodeName === 'INPUT' && (<HTMLInputElement>field).type === 'checkbox') {
-    //
-    //       if((<HTMLInputElement>field).checked) {
-    //         this.transform.value[key] = '1';
-    //       } else {
-    //         this.transform.value[key] = '0';
-    //       }
-    //     }
-    //   }
-    //   this.transform.changed.dispatch();
-    // } catch {
-    //   this.updateView();
-    // }
+    this.addButton(this.prSaveNeuron, 'Save Neuron', 'button', 'prSaveNeuron');
   }
 }
