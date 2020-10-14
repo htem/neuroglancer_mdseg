@@ -21,9 +21,7 @@
 import './coordinate_transform.css';
 import {Color} from 'neuroglancer/color';
 import {Atab} from 'neuroglancer/ui/AbstractTab';
-import {TrackableBoolean, TrackableBooleanCheckbox} from 'neuroglancer/trackable_boolean';
-import {TrackableValue} from 'neuroglancer/trackable_value';
-import {StringInputWidget} from 'neuroglancer/widget/string_input_widget';
+
 
 /**
  * View for the Color tab.
@@ -71,41 +69,6 @@ export class ColorTab extends Atab {
     this.addCheckbox('Clear segments before load', transform.clClearBeforeLoad);
 
     this.updateView();
-  }
-
-
-  addCheckbox = (label: string, value: TrackableBoolean) => {
-    const linebreak = document.createElement('br');
-    const div_inpArea = document.createElement('DIV');
-    div_inpArea.setAttribute('align','right');
-
-    this.m.set(label, document.createElement('input'));
-
-    const labelElement = document.createElement('label');
-    labelElement.textContent = label;
-    const checkbox = this.registerDisposer(new TrackableBooleanCheckbox(value));
-    labelElement.appendChild(checkbox.element);
-    div_inpArea.appendChild(labelElement);
-    div_inpArea.appendChild(linebreak);
-    div_inpArea.appendChild(linebreak);
-    this.element.appendChild(div_inpArea);
-  }
-
-  addTextArea = (label: string, value: TrackableValue<string>, rows:number=1, cols:number=24) => {
-    this.m.set(label, document.createElement('textarea'));
-
-    const div_textArea = document.createElement('DIV');
-    div_textArea.setAttribute('align','right');
-
-    const labelElement = document.createElement('H3');
-    labelElement.textContent = label;
-    labelElement.style.padding = '0';
-    labelElement.style.margin='0';
-
-    const inputField = this.registerDisposer(new StringInputWidget(value, rows, cols));
-    labelElement.appendChild(inputField.element);
-    div_textArea.appendChild(labelElement);
-    this.element.appendChild(div_textArea);
   }
 
   /**
