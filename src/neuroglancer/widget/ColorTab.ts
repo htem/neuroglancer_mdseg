@@ -61,9 +61,11 @@ export class ColorTab extends Atab {
     // this.addInputElement(this.clNeuronColorButton,'Set color','button','clNeuronColorButton');
     // this.addInputElement(this.clAlsoLoadNeurons,'Also load neurons');
     // this.addInputElement(this.clClearBeforeLoad,'Clear segments before load');
-    this.addTextArea('set_color_val', transform.set_color_val);
-    this.addCheckbox('clAlsoLoadNeurons', transform.clAlsoLoadNeurons);
-    this.addCheckbox('clClearBeforeLoad', transform.clClearBeforeLoad);
+
+    this.addTextArea('Color value', transform.set_color_val);
+    this.addTextArea('Neuron color mapping', transform.clNeuronColor);
+    this.addCheckbox('Also load neurons', transform.clAlsoLoadNeurons);
+    this.addCheckbox('Clear segments before load', transform.clClearBeforeLoad);
 
     this.updateView();
   }
@@ -84,12 +86,18 @@ export class ColorTab extends Atab {
   addTextArea = (label: string, value: TrackableValue<string>) => {
     this.m.set(label, document.createElement('textarea'));
 
-    const labelElement = document.createElement('label');
+    const div_textArea = document.createElement('DIV');
+    div_textArea.setAttribute('align','right');
+
+    const labelElement = document.createElement('H3');
     labelElement.textContent = label;
+    labelElement.style.padding = '0';
+    labelElement.style.margin='0';
 
     const inputField = this.registerDisposer(new StringInputWidget(value));
     labelElement.appendChild(inputField.element);
-    this.element.appendChild(labelElement);
+    div_textArea.appendChild(labelElement);
+    this.element.appendChild(div_textArea);
   }
 
   /**

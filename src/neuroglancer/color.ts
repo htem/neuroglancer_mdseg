@@ -33,6 +33,7 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
   changed = new NullarySignal();
 
   set_color_val = new TrackableValue('', verifyString,'');
+  clNeuronColor = new TrackableValue('', verifyString,'');
   clClearBeforeLoad = new TrackableBoolean(false, false);
   clAlsoLoadNeurons = new TrackableBoolean(false, false);
 
@@ -43,6 +44,7 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
 
   state = {
     set_color_val: this.set_color_val,
+    clNeuronColor: this.clNeuronColor,
     clClearBeforeLoad: this.clClearBeforeLoad,
     clAlsoLoadNeurons: this.clAlsoLoadNeurons
   };
@@ -52,6 +54,7 @@ export class Color extends CompoundTrackable implements WatchableValueInterface<
     super();
     console.log('constructing new color model');
     super.add('set_color_val', this.state.set_color_val);
+    super.add('clNeuronColor', this.state.clNeuronColor);
     super.add('clClearBeforeLoad', this.state.clClearBeforeLoad);
     super.add('clAlsoLoadNeurons', this.state.clAlsoLoadNeurons);
 
