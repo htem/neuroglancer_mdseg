@@ -106,8 +106,8 @@ export abstract class Atab extends Tab {
     labelElement.style.margin='0';
 
     const inputField = this.registerDisposer(new StringInputWidget(value, rows, cols));
-    labelElement.appendChild(inputField.element);
     div_textArea.appendChild(labelElement);
+    div_textArea.appendChild(inputField.element);
     this.element.appendChild(div_textArea);
   }
 
