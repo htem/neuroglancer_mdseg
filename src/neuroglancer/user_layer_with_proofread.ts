@@ -38,7 +38,6 @@ export function UserLayerWithProofreadMixin<TBase extends {new (...args: any[]):
     Base: TBase) {
   class C extends Base implements UserLayerWithProofread {
     pr = new Proofread();
-    // sr = new Neurondb();
 
     constructor(...args: any[]) {
       super(...args);
@@ -51,14 +50,6 @@ export function UserLayerWithProofreadMixin<TBase extends {new (...args: any[]):
       });
       const specification = args[1];
       this.pr.restoreState(specification[PROOFREAD_KEY]);
-      /*this.sr.changed.add(this.specificationChanged.dispatch);
-      this.tabs.add(PROOFREAD_TAB_NAME, {
-        label: SEARCH_TAB_NAME,
-        order: 100,
-        getter: () => new ProofreadSearchTab(this.sr)
-      });
-        */
-      // this.sr.restoreState(args[2][NEURONDB_KEY]);
 
 
     }

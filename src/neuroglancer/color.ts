@@ -13,78 +13,67 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {WatchableValueInterface} from 'neuroglancer/trackable_value';
+import {TrackableValue} from 'neuroglancer/trackable_value';
 import {NullarySignal} from 'neuroglancer/util/signal';
+import {TrackableBoolean} from 'neuroglancer/trackable_boolean';
+import {CompoundTrackable} from 'neuroglancer/util/trackable';
+import {verifyString} from 'neuroglancer/util/json';
 
 
-
-
-export interface IValue {
-  [details: string]: string;
-}
 
 /**
  * Model for the Color tab. Keeps track of the state of text boxes and checkboxes in the Color tab.
  */
-export class Color implements WatchableValueInterface<IValue> {
+export class Color extends CompoundTrackable {
   changed = new NullarySignal();
 
-  private _value: IValue;
-  // private emptyTextArea: IValue;
+  set_color_val = new TrackableValue('', verifyString,'');
+  clNeuronColor = new TrackableValue('', verifyString,'');
+  clClearBeforeLoad = new TrackableBoolean(false, false);
+  clAlsoLoadNeurons = new TrackableBoolean(false, false);
+
+  state = {
+    set_color_val: this.set_color_val,
+    clNeuronColor: this.clNeuronColor,
+    clClearBeforeLoad: this.clClearBeforeLoad,
+    clAlsoLoadNeurons: this.clAlsoLoadNeurons
+  };
 
   constructor() {
-    // maybe you can add to same dictionary instead of array of dictionary
-    let textArea: IValue = {};
-    textArea['set_color_val']='';
-    textArea['clNeuronColor']='';
-    textArea['clAlsoLoadNeurons']='0';
-    textArea['clClearBeforeLoad']='0';
-
-    this._value =textArea;
-    // this.emptyTextArea = textArea;
+    super();
+    super.add('set_color_val', this.state.set_color_val);
+    super.add('clNeuronColor', this.state.clNeuronColor);
+    super.add('clClearBeforeLoad', this.state.clClearBeforeLoad);
+    super.add('clAlsoLoadNeurons', this.state.clAlsoLoadNeurons);
   }
 
   /**
-   * Getter for _value.
-   */
-  get value() {
-    return this._value;
-  }
-
-  /**
-   * Resets all values to either an empty string or 0.
+   * Resets all values to their default values.
    */
   reset() {
-   let empty: IValue = {};
-
-   empty['set_color_val']='';
-   empty['clNeuronColor']='';
-   empty['clAlsoLoadNeurons']='0';
-   empty['clClearBeforeLoad']='0';
-   this._value = empty;
-   this.changed.dispatch();
+    super.reset();
   }
 
   /**
    * Returns the state of the Color tab as a JSON.
    */
   toJSON() {
-    // if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
-    //   return {};
-    // } else {
-    //   return this._value;
-    // }
-    return this._value;
+    return super.toJSON();
   }
 
-  restoreState(x: IValue) {
+  /**
+   * Restores the state of the Color tab to the provided state.
+   * @param x The state in which to restore the Color tab state to.
+   */
+  restoreState(x: any) {
     if (x == null) {
-      this.reset();
+      // this.reset();
       return;
     }
 
     try {
-      this._value = x;
+      this.state = x;
+      super.restoreState(this.state);
       this.changed.dispatch();
     } catch(ignoredError) {
       this.reset();

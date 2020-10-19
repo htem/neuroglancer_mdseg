@@ -13,98 +13,100 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {WatchableValueInterface} from 'neuroglancer/trackable_value';
+import {TrackableValue} from 'neuroglancer/trackable_value';
 import {NullarySignal} from 'neuroglancer/util/signal';
+import {CompoundTrackable} from 'neuroglancer/util/trackable';
+import {verifyString} from 'neuroglancer/util/json';
+import {TrackableBoolean} from 'neuroglancer/trackable_boolean';
 
-
-
-
-export interface IValue {
-  [details: string]: string;
-}
 
 /**
  * Model for the Proofread tab. Keeps track of the state of text boxes and checkboxes in the Proofread tab.
  */
-export class Proofread implements WatchableValueInterface<IValue> {
+export class Proofread extends CompoundTrackable {
   changed = new NullarySignal();
 
-  private _value: IValue;
-  // private emptyTextArea: IValue;
+  prNeuronName = new TrackableValue('', verifyString,'');
+  prCellType = new TrackableValue('', verifyString,'');
+  prTags = new TrackableValue('', verifyString,'');
+  prLocTags = new TrackableValue('', verifyString,'');
+  prUncertainCon = new TrackableValue('', verifyString,'');
+  prMergers = new TrackableValue('', verifyString,'');
+  prAnnotator = new TrackableValue('', verifyString,'');
+  prNotes = new TrackableValue('', verifyString,'');
+  prFinished = new TrackableBoolean(false, false);
+  prReviewed = new TrackableBoolean(false, false);
+  prSomaLoc = new TrackableValue('', verifyString,'');
+  prOverrideSuperSetCheck = new TrackableBoolean(false, false);
+  prOverrideConflictCheck = new TrackableBoolean(false, false);
+  prGrowThreshold = new TrackableValue('', verifyString,'');
+  prSuperGrowThreshold = new TrackableValue('', verifyString,'');
+
+  state = {
+    prNeuronName: this.prNeuronName,
+    prCellType: this.prCellType,
+    prTags: this.prTags,
+    prLocTags: this.prLocTags,
+    prUncertainCon: this.prUncertainCon,
+    prMergers: this.prMergers,
+    prAnnotator: this.prAnnotator,
+    prNotes: this.prNotes,
+    prFinished: this.prFinished,
+    prReviewed: this.prReviewed,
+    prSomaLoc: this.prSomaLoc,
+    prOverrideSuperSetCheck: this.prOverrideSuperSetCheck,
+    prOverrideConflictCheck: this.prOverrideConflictCheck,
+    prGrowThreshold: this.prGrowThreshold,
+    prSuperGrowThreshold: this.prSuperGrowThreshold,
+  };
+
 
   constructor() {
-    // maybe you can add to same dictionary instead of array of dictionary
-    let textArea: IValue = {};
-    textArea['prNeuronName']= '';
-    textArea['prCellType']='';
-    textArea['prTags']='';
-    textArea['prLocTags']='';
-    textArea['prUncertainCon']='';
-    textArea['prMergers']='';
-    textArea['prAnnotator']='';
-    textArea['prNotes']='';
-    textArea['prFinished']='0';
-    textArea['prReviewed']='0';
-    textArea['prSomaLoc']='';
-    textArea['prOverrideSuperSetCheck']='0';
-    textArea['prOverrideConflictCheck']='0';
-    textArea['prGrowThreshold']='';
-    textArea['prSuperGrowThreshold']='';
-
-    this._value =textArea;
-    // this.emptyTextArea = textArea;
+    super();
+    super.add('prNeuronName', this.prNeuronName);
+    super.add('prCellType', this.prCellType);
+    super.add('prTags', this.prTags);
+    super.add('prLocTags', this.prLocTags);
+    super.add('prUncertainCon', this.prUncertainCon);
+    super.add('prMergers', this.prMergers);
+    super.add('prAnnotator', this.prAnnotator);
+    super.add('prNotes', this.prNotes);
+    super.add('prFinished', this.prFinished);
+    super.add('prReviewed', this.prReviewed);
+    super.add('prSomaLoc', this.prSomaLoc);
+    super.add('prOverrideSuperSetCheck', this.prOverrideSuperSetCheck);
+    super.add('prOverrideConflictCheck', this.prOverrideConflictCheck);
+    super.add('prGrowThreshold', this.prGrowThreshold);
+    super.add('prSuperGrowThreshold', this.prSuperGrowThreshold);
   }
 
   /**
-   * Getter for _value.
-   */
-  get value() {
-    return this._value;
-  }
-
-  /**
-   * Resets all values to either an empty string or 0.
+   * Resets all values to their default values.
    */
   reset() {
-   let textArea: IValue = {};
-   textArea['prNeuronName']= '';
-   textArea['prCellType']='';
-   textArea['prTags']='';
-   textArea['prLocTags']='';
-   textArea['prUncertainCon']='';
-   textArea['prMergers']='';
-   textArea['prAnnotator']='';
-   textArea['prNotes']='';
-   textArea['prFinished']='0';
-   textArea['prReviewed']='0';
-   textArea['prSomaLoc']='';
-   textArea['prOverrideSuperSetCheck']='0';
-   textArea['prOverrideConflictCheck']='0';
-   textArea['prGrowThreshold']='';
-   textArea['prSuperGrowThreshold']='';
-   this._value = textArea;
-   this.changed.dispatch();
+    super.reset();
   }
 
-
+  /**
+   * Returns the state of the Proofread tab as a JSON.
+   */
   toJSON() {
-    // console.log('pr value: ' + JSON.stringify(this._value));
-    // if(JSON.stringify(this._value) === JSON.stringify(this.emptyTextArea)) {
-    //   return {};
-    // } else {
-    //   return this._value;
-    // }
-    return this._value;
+    return super.toJSON();
   }
 
-  restoreState(x: IValue) {
+  /**
+   * Restores the state of the Proofread tab to the provided state.
+   * @param x The state in which to restore the Proofread tab state to.
+   */
+  restoreState(x: any) {
     if (x == null) {
-      this.reset();
+      // this.reset();
       return;
     }
 
     try {
-      this._value = x;
+      this.state = x;
+      super.restoreState(this.state);
       this.changed.dispatch();
     } catch(ignoredError) {
       this.reset();

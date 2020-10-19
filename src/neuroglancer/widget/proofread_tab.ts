@@ -28,24 +28,7 @@ import {Proofread} from 'neuroglancer/proofread';
  */
 export class ProofreadTab extends Atab {
 
-  m: Map<string,HTMLElement> = new Map();
-
-  private prNeuronName = document.createElement('textarea');
-  private prCellType = document.createElement('textarea');
-  private prTags = document.createElement('textarea');
-  private prLocTags = document.createElement('textarea');
-  private prUncertainCon = document.createElement('textarea');
-  private prMergers = document.createElement('textarea');
-  private prAnnotator = document.createElement('textarea');
-  private prNotes = document.createElement('textarea');
-  private prFinished = document.createElement('input');
-  private prReviewed = document.createElement('input');
-  private prSomaLoc = document.createElement('textarea');
   private prSomaLocCopyLoc = document.createElement('input');
-  private prGrowThreshold = document.createElement('textarea');
-  private prSuperGrowThreshold = document.createElement('textarea');
-  private prOverrideSuperSetCheck = document.createElement('input');
-  private prOverrideConflictCheck = document.createElement('input');
   private prSaveNeuron = document.createElement('input');
 
 
@@ -55,66 +38,22 @@ export class ProofreadTab extends Atab {
     const {element} = this;
     element.classList.add('neuroglancer-Proofread-widget');
 
-
-    this.m.set('prNeuronName', this.prNeuronName);
-    this.m.set('prCellType', this.prCellType);
-    this.m.set('prTags', this.prTags);
-    this.m.set('prLocTags', this.prLocTags);
-    this.m.set('prUncertainCon', this.prUncertainCon);
-    this.m.set('prMergers', this.prMergers);
-    this.m.set('prAnnotator', this.prAnnotator);
-    this.m.set('prNotes', this.prNotes);
-    this.m.set('prFinished', this.prFinished);
-    this.m.set('prReviewed', this.prReviewed);
-    this.m.set('prSomaLoc', this.prSomaLoc);
-    this.m.set('prSomaLocCopyLoc', this.prSomaLocCopyLoc);
-    this.m.set('prGrowThreshold', this.prGrowThreshold);
-    this.m.set('prSuperGrowThreshold', this.prSuperGrowThreshold);
-    this.m.set('prOverrideSuperSetCheck', this.prOverrideSuperSetCheck);
-    this.m.set('prOverrideConflictCheck', this.prOverrideConflictCheck);
-    this.m.set('prSaveNeuron', this.prSaveNeuron);
-
-    this.addTextField(this.prNeuronName, 'Neuron Name', 'H3', 2);
-    this.addTextField(this.prCellType, 'Cell Type', 'H3');
-    this.addTextField(this.prTags, 'Tags', 'H3');
-    this.addTextField(this.prLocTags, 'Location Tags', 'H3', 2);
-    this.addTextField(this.prUncertainCon, 'Uncertain Continuation', 'H3', 4);
-    this.addTextField(this.prMergers, 'Merge Locations', 'H3', 4);
-    this.addTextField(this.prNotes, 'Notes', 'H3', 8, 28);
-    this.addTextField(this.prGrowThreshold, 'Grow Threshold', 'H3');
-    this.addTextField(this.prSuperGrowThreshold, 'Super Grow Threshold', 'H3');
-    this.addInputElement(this.prFinished, 'Finished');
-    this.addInputElement(this.prReviewed, 'Reviewed');
-    this.addTextField(this.prSomaLoc, 'Soma Location', 'H3');
-    this.addInputElement(this.prSomaLocCopyLoc, 'Copy Location', 'button', 'prSomaLocCopyLoc');
-    this.addInputElement(this.prOverrideSuperSetCheck, 'Override Set Check');
-    this.addInputElement(this.prOverrideConflictCheck, 'Override Conflict Check');
-    this.addTextField(this.prAnnotator, 'Annotator', 'H3');
-    this.addInputElement(this.prSaveNeuron, 'Save Neuron', 'button', 'prSaveNeuron');
-    this.updateView();
-  }
-
-  /**
-   * Uses the values in the text boxes and checkboxes to update the model for the Proofread tab.
-   */
-  updateModel() {
-    try {
-      for (let key in this.transform.value) {
-        let field = this.m.get(key)!;
-        if(field.nodeName === 'TEXTAREA') {
-          this.transform.value[key]= (<HTMLTextAreaElement>field).value;
-        } else if(field.nodeName === 'INPUT' && (<HTMLInputElement>field).type === 'checkbox') {
-
-          if((<HTMLInputElement>field).checked) {
-            this.transform.value[key] = '1';
-          } else {
-            this.transform.value[key] = '0';
-          }
-        }
-      }
-      this.transform.changed.dispatch();
-    } catch {
-      this.updateView();
-    }
+    this.addTextArea('Neuron Name', transform.prNeuronName, 2);
+    this.addTextArea('Cell Type', transform.prCellType);
+    this.addTextArea('Tags', transform.prTags);
+    this.addTextArea('Location Tags', transform.prLocTags, 2);
+    this.addTextArea('Uncertain Continuation', transform.prUncertainCon, 4);
+    this.addTextArea('Merge Locations', transform.prMergers, 4);
+    this.addTextArea('Notes', transform.prNotes, 8, 28);
+    this.addTextArea('Grow Threshold', transform.prGrowThreshold);
+    this.addTextArea('Super Grow Threshold', transform.prSuperGrowThreshold);
+    this.addCheckbox('Finished', transform.prFinished);
+    this.addCheckbox('Reviewed', transform.prReviewed);
+    this.addTextArea('Soma Location', transform.prSomaLoc);
+    this.addButton(this.prSomaLocCopyLoc, 'Copy Location', 'button', 'prSomaLocCopyLoc');
+    this.addCheckbox('Override Set Check', transform.prOverrideSuperSetCheck);
+    this.addCheckbox('Override Conflict Check', transform.prOverrideConflictCheck);
+    this.addTextArea('Annotator', transform.prAnnotator);
+    this.addButton(this.prSaveNeuron, 'Save Neuron', 'button', 'prSaveNeuron');
   }
 }

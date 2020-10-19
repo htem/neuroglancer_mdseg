@@ -33,11 +33,12 @@ export interface UserLayerWithColor extends UserLayer {
 export function UserLayerWithColorMixin<TBase extends {new (...args: any[]): UserLayer}>(
     Base: TBase) {
   class C extends Base implements UserLayerWithColor {
-    cl = new Color();
+    cl: Color;
 
 
     constructor(...args: any[]) {
       super(...args);
+      this.cl = new Color();
 
       this.cl.changed.add(this.specificationChanged.dispatch);
       this.tabs.add(COLOR_TAB_NAME, {
@@ -45,10 +46,9 @@ export function UserLayerWithColorMixin<TBase extends {new (...args: any[]): Use
         order: 100,
         getter: () => new ColorTab(this.cl)
       });
+      console.log(JSON.stringify(args));
       const specification = args[1];
       this.cl.restoreState(specification[COLOR_KEY]);
-
-
     }
     toJSON(): any {
       const x = super.toJSON();
