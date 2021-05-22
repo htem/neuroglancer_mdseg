@@ -219,7 +219,7 @@ class SkeletonHandler(BaseRequestHandler):
         def handle_result(f):
             try:
                 encoded_skeleton = f.result()
-            except:
+            except Exception as e:
                 self.send_error(500, message=e.args[0])
                 return
             if encoded_skeleton is None:
