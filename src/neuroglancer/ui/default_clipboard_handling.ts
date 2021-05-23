@@ -15,7 +15,7 @@
  */
 
 import {isInputTextTarget} from 'neuroglancer/util/dom';
-import {getCachedJson} from 'neuroglancer/util/trackable';
+// import {getCachedJson} from 'neuroglancer/util/trackable';
 import {Viewer} from 'neuroglancer/viewer';
 
 export function bindDefaultCopyHandler(viewer: Viewer) {
@@ -25,12 +25,25 @@ export function bindDefaultCopyHandler(viewer: Viewer) {
     }
     const selection = document.getSelection();
     if (selection !== null && selection.type === 'Range') return;
+
+    // adapted from https://github.com/google/neuroglancer/blob/8432f531c4d8eb421556ec36926a29d9064c2d3c/src/neuroglancer/python_integration/remote_actions.ts
+    const {mouseState} = viewer;
+    const {clipboardData} = event;
+    if (mouseState.updateUnconditionally()) {
+      if (clipboardData !== null) {
+        clipboardData.setData('text/plain', Array.prototype.slice.call(mouseState.position));
+      }
+    }
+    event.preventDefault();
+
+    /*
     const stateJson = getCachedJson(viewer.state).value;
     const {clipboardData} = event;
     if (clipboardData !== null) {
       clipboardData.setData('text/plain', JSON.stringify(stateJson, undefined, '  '));
     }
     event.preventDefault();
+    */
   });
 }
 
