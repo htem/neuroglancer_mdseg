@@ -16,16 +16,10 @@
 
 import {UserLayer} from 'neuroglancer/layer';
 import {Proofread} from 'neuroglancer/proofread';
-// import {Neurondb} from 'neuroglancer/neurondb';
 import {ProofreadTab} from 'neuroglancer/widget/proofread_tab';
-// import {ProofreadSearchTab} from 'neuroglancer/widget/proofread_search_tab';
-
 
 const PROOFREAD_TAB_NAME = 'Proofread';
-// const PROOFREAD_KEY = 'pr';
-// const NEURONDB_KEY = 'neurondb';
-// const SEARCH_TAB_NAME = 'Search DB';
-
+const PROOFREAD_KEY = 'pr';
 
 export interface UserLayerWithProofread extends UserLayer {
   pr: Proofread;
@@ -41,21 +35,22 @@ export function UserLayerWithProofreadMixin<TBase extends {new (...args: any[]):
 
     constructor(...args: any[]) {
       super(...args);
-
       this.pr.changed.add(this.specificationChanged.dispatch);
       this.tabs.add(PROOFREAD_TAB_NAME, {
         label: PROOFREAD_TAB_NAME,
         order: 100,
         getter: () => new ProofreadTab(this.pr)
       });
-      // const specification = args[1];
-      // this.pr.restoreState(specification[PROOFREAD_KEY]);
-
-
     }
+
+    restoreState(specification: any) {
+        super.restoreState(specification);
+        this.pr.restoreState(specification[PROOFREAD_KEY]);
+    }
+
     toJSON(): any {
       const x = super.toJSON();
-      // x[PROOFREAD_KEY] = this.pr.toJSON();
+      x[PROOFREAD_KEY] = this.pr.toJSON();
       return x;
     }
   }

@@ -18,10 +18,8 @@ import {UserLayer} from 'neuroglancer/layer';
 import {Color} from 'neuroglancer/color';
 import {ColorTab} from 'neuroglancer/widget/ColorTab';
 
-
 const COLOR_TAB_NAME = 'Colors';
-// const COLOR_KEY = 'colors';
-
+const COLOR_KEY = 'colors';
 
 export interface UserLayerWithColor extends UserLayer {
     cl: Color;
@@ -33,26 +31,26 @@ export interface UserLayerWithColor extends UserLayer {
 export function UserLayerWithColorMixin<TBase extends {new (...args: any[]): UserLayer}>(
     Base: TBase) {
   class C extends Base implements UserLayerWithColor {
-    cl: Color;
-
+    cl = new Color();
 
     constructor(...args: any[]) {
       super(...args);
-      this.cl = new Color();
-
       this.cl.changed.add(this.specificationChanged.dispatch);
       this.tabs.add(COLOR_TAB_NAME, {
         label: COLOR_TAB_NAME,
         order: 100,
         getter: () => new ColorTab(this.cl)
       });
-      console.log(JSON.stringify(args));
-      // const specification = args[1];
-      // this.cl.restoreState(specification[COLOR_KEY]);
     }
+    
+    restoreState(specification: any) {
+        super.restoreState(specification);
+        this.cl.restoreState(specification[COLOR_KEY]);
+    }
+
     toJSON(): any {
       const x = super.toJSON();
-      // x[COLOR_KEY] = this.cl.toJSON();
+      x[COLOR_KEY] = this.cl.toJSON();
       return x;
     }
   }

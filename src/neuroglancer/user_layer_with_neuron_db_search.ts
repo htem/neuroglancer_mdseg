@@ -41,9 +41,13 @@ export function UserLayerWithNeurondbMixin<TBase extends {new (...args: any[]): 
         order: 100,
         getter: () => new ProofreadSearchTab(this.sr)
       });
-      // const specification = args[1];
-      // this.sr.restoreState(specification[NEURONDB_KEY]);
     }
+
+    restoreState(specification: any) {
+        super.restoreState(specification);
+        this.sr.restoreState(specification[NEURONDB_KEY]);
+    }
+
     toJSON(): any {
       const x = super.toJSON();
       x[NEURONDB_KEY] = this.sr.toJSON();
