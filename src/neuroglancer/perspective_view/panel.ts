@@ -17,8 +17,8 @@
 import 'neuroglancer/noselect.css';
 import './panel.css';
 
-import {AxesLineHelper} from 'neuroglancer/axes_lines';
-import {DisplayContext} from 'neuroglancer/display_context';
+import {AxesLineHelper, computeAxisLineMatrix} from 'neuroglancer/axes_lines';
+import {applyRenderViewportToProjectionMatrix, DisplayContext} from 'neuroglancer/display_context';
 import {makeRenderedPanelVisibleLayerTracker, VisibleRenderLayerTracker} from 'neuroglancer/layer';
 import {PERSPECTIVE_VIEW_RPC_ID} from 'neuroglancer/perspective_view/base';
 import {PerspectiveViewReadyRenderContext, PerspectiveViewRenderContext, PerspectiveViewRenderLayer} from 'neuroglancer/perspective_view/render_layer';
@@ -31,12 +31,12 @@ import {TrackableValue, WatchableValueInterface} from 'neuroglancer/trackable_va
 import {TrackableRGB} from 'neuroglancer/util/color';
 import {Owned} from 'neuroglancer/util/disposable';
 import {ActionEvent, registerActionListener} from 'neuroglancer/util/event_action_map';
-import {kAxes, mat4, vec3, vec4} from 'neuroglancer/util/geom';
+import {kAxes, kZeroVec4, mat4, vec3, vec4} from 'neuroglancer/util/geom';
 import {startRelativeMouseDrag} from 'neuroglancer/util/mouse_drag';
 import {TouchRotateInfo, TouchTranslateInfo} from 'neuroglancer/util/touch_bindings';
 import {WatchableMap} from 'neuroglancer/util/watchable_map';
 import {withSharedVisibility} from 'neuroglancer/visibility_priority/frontend';
-import {DepthStencilBuffer, FramebufferConfiguration, makeTextureBuffers, OffscreenCopyHelper, TextureBuffer} from 'neuroglancer/webgl/offscreen';
+import {DepthStencilRenderbuffer, FramebufferConfiguration, makeTextureBuffers, OffscreenCopyHelper, TextureBuffer} from 'neuroglancer/webgl/offscreen';
 import {ShaderBuilder} from 'neuroglancer/webgl/shader';
 import {MultipleScaleBarTextures, ScaleBarOptions} from 'neuroglancer/widget/scale_bar';
 import {RPC, SharedObject} from 'neuroglancer/worker_rpc';
@@ -182,7 +182,7 @@ export class PerspectivePanel extends RenderedDataPanel {
           this.gl, WebGL2RenderingContext.R32F, WebGL2RenderingContext.RED,
           WebGL2RenderingContext.FLOAT),
     ],
-    depthBuffer: new DepthStencilBuffer(this.gl)
+    depthBuffer: new DepthStencilRenderbuffer(this.gl)
   }));
 
   protected transparentConfiguration_: FramebufferConfiguration<TextureBuffer>|undefined;
@@ -204,8 +204,8 @@ export class PerspectivePanel extends RenderedDataPanel {
     this.projectionParameters = this.registerDisposer(new DerivedProjectionParameters({
       navigationState: this.navigationState,
       update: (out: ProjectionParameters, navigationState) => {
-        const {invViewMatrix, projectionMat, width, height} = out;
-        const widthOverHeight = width / height;
+        const {invViewMatrix, projectionMat, logicalWidth, logicalHeight} = out;
+        const widthOverHeight = logicalWidth / logicalHeight;
         const fovy = Math.PI / 4.0;
         let {relativeDepthRange} = navigationState;
         const baseZoomFactor = navigationState.zoomFactor.value;
@@ -224,6 +224,7 @@ export class PerspectivePanel extends RenderedDataPanel {
           zoomFactor *= f;
           mat4.perspective(projectionMat, fovy, widthOverHeight, nearBound, farBound);
         }
+        applyRenderViewportToProjectionMatrix(out, projectionMat);
         navigationState.pose.toMat4(invViewMatrix, zoomFactor);
         mat4.scale(invViewMatrix, invViewMatrix, vec3.set(tempVec3, 1, -1, -1));
         mat4.translate(invViewMatrix, invViewMatrix, kAxes[2]);
@@ -290,19 +291,24 @@ export class PerspectivePanel extends RenderedDataPanel {
 
   translateByViewportPixels(deltaX: number, deltaY: number): void {
     const temp = tempVec3;
-    const {viewProjectionMat, invViewProjectionMat, width, height} =
+    const {viewProjectionMat, invViewProjectionMat, logicalWidth, logicalHeight} =
         this.projectionParameters.value;
     const {pose} = this.viewer.navigationState;
     pose.updateDisplayPosition(pos => {
       vec3.transformMat4(temp, pos, viewProjectionMat);
-      temp[0] = -2 * deltaX / width;
-      temp[1] = 2 * deltaY / height;
+      temp[0] += -2 * deltaX / logicalWidth;
+      temp[1] += 2 * deltaY / logicalHeight;
       vec3.transformMat4(pos, temp, invViewProjectionMat);
     });
   }
 
   get navigationState() {
     return this.viewer.navigationState;
+  }
+
+  ensureBoundsUpdated() {
+    super.ensureBoundsUpdated();
+    this.projectionParameters.setViewport(this.renderViewport);
   }
 
   isReady() {
@@ -316,8 +322,8 @@ export class PerspectivePanel extends RenderedDataPanel {
         }
       }
     }
-    this.checkForResize();
-    const {width, height} = this;
+    this.ensureBoundsUpdated();
+    const {width, height} = this.renderViewport;
     if (width === 0 || height === 0) {
       return true;
     }
@@ -335,13 +341,31 @@ export class PerspectivePanel extends RenderedDataPanel {
     return true;
   }
 
-  panelSizeChanged() {
-    this.projectionParameters.setViewportShape(this.width, this.height);
-  }
-
   disposed() {
     this.sliceViews.clear();
     super.disposed();
+  }
+
+  getDepthArray(): Float32Array|undefined {
+    if (!this.navigationState.valid) {
+      return undefined;
+    }
+    const {offscreenFramebuffer, renderViewport: {width, height}} = this;
+    const numPixels = width * height;
+    const depthArrayRGBA = new Float32Array(numPixels * 4);
+    try {
+      offscreenFramebuffer.bindSingle(OffscreenTextures.Z);
+      this.gl.readPixels(
+          0, 0, width, height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.FLOAT,
+          depthArrayRGBA);
+    } finally {
+      offscreenFramebuffer.framebuffer.unbind();
+    }
+    const depthArray = new Float32Array(numPixels);
+    for (let i = 0; i < numPixels; ++i) {
+      depthArray[i] = depthArrayRGBA[i * 4];
+    }
+    return depthArray;
   }
 
   issuePickRequest(glWindowX: number, glWindowY: number) {
@@ -372,11 +396,14 @@ export class PerspectivePanel extends RenderedDataPanel {
       tempVec3[1] = 2.0 * (glWindowY + relativeY - pickRadius) / pickingData.viewportHeight - 1.0;
       tempVec3[2] = 2.0 * glWindowZ - 1.0;
       vec3.transformMat4(tempVec3, tempVec3, pickingData.invTransform);
-      let {position: mousePosition} = mouseState;
+      let {position: mousePosition, unsnappedPosition} = mouseState;
       const {value: voxelCoordinates} = this.navigationState.position;
       const rank = voxelCoordinates.length;
       if (mousePosition.length !== rank) {
         mousePosition = mouseState.position = new Float32Array(rank);
+      }
+      if (unsnappedPosition.length !== rank) {
+        unsnappedPosition = mouseState.unsnappedPosition = new Float32Array(rank);
       }
       mousePosition.set(voxelCoordinates);
       mouseState.coordinateSpace = this.navigationState.coordinateSpace.value;
@@ -385,6 +412,7 @@ export class PerspectivePanel extends RenderedDataPanel {
       for (let i = 0, spatialRank = displayDimensionIndices.length; i < spatialRank; ++i) {
         mousePosition[displayDimensionIndices[i]] = tempVec3[i];
       }
+      unsnappedPosition.set(mousePosition);
       const pickValue = data[4 * pickDiameter * pickDiameter + 4 * offset];
       pickingData.pickIDs.setMouseState(mouseState, pickValue);
       mouseState.displayDimensions = displayDimensions;
@@ -421,8 +449,7 @@ export class PerspectivePanel extends RenderedDataPanel {
     if (!this.navigationState.valid) {
       return false;
     }
-    const {width, height} = this;
-
+    const {width, height} = this.renderViewport;
     const showSliceViews = this.viewer.showSliceViews.value;
     for (const [sliceView, unconditional] of this.sliceViews) {
       if (unconditional || showSliceViews) {
@@ -432,27 +459,56 @@ export class PerspectivePanel extends RenderedDataPanel {
 
     let gl = this.gl;
     this.offscreenFramebuffer.bind(width, height);
+    gl.disable(gl.SCISSOR_TEST);
 
-    // Stencil buffer bit 0 indicates positions of framebuffer written by either:
-    // - a non-transparent layer;
-    // - a transparent layer with transparent pick enabled.
+    // Stencil buffer bit 0 indicates positions of framebuffer written by an opaque layer.
     //
-    // In the final pick rendering pass for transparent layers with transparent pick enabled, we
-    // only write to positions with the stencil bit unset.
-
+    // Stencil buffer bit 1 indicates positions of framebuffer written by a transparent layer with
+    // transparentPickEnabled=true.
+    //
+    // For a given xy framebuffer position, the pick id is chosen as the front-most position within
+    // the highest *priority* class for which there is a fragment.  The 3 priority classes are:
+    //
+    // 1. Opaque layers
+    // 2. Transparent layers with transparentPickEnabled==true
+    // 3. Transparent layers with transparentPickEnabled==false
+    //
+    // For example, if a given ray passes first through an object from a transparent layer with
+    // transparentPickEnabled=false, then through an object from a transparent layer with
+    // transparentPickEnabled=true, the pick id will be for the object with
+    // transparentPickEnabled=true, even though it is not the front-most object.
+    //
+    // We accomplish this priority scheme by writing to the pick buffer in 3 phases:
+    //
+    // 1. For opaque layers, we write to the pick buffer and depth buffer, and also set bit 0 of the
+    // stencil buffer, at the same time as we render the color buffer.
+    //
+    // 2. For transparent layers, we write to the pick buffer as a separate rendering pass.  First,
+    // we handle transparentPickEnabled=true layers: we write to the pick buffer and depth buffer,
+    // and set the stencil buffer to `3`, but only at positions where the stencil buffer is unset.
+    // Then, for transparentPickEnabled=false layers, we write to the pick buffer and depth buffer,
+    // but only at positions where the stencil buffer is still unset.
     gl.enable(WebGL2RenderingContext.STENCIL_TEST);
+    gl.stencilMask(0xffffffff);
     gl.clearStencil(0);
     gl.clear(WebGL2RenderingContext.STENCIL_BUFFER_BIT);
-    gl.stencilOpSeparate(
-        /*face=*/ WebGL2RenderingContext.FRONT_AND_BACK, /*sfail=*/ WebGL2RenderingContext.KEEP,
+
+    // Write 1 to the stencil buffer unconditionally.  We set an always-pass stencil test in order
+    // to be able to write to the stencil buffer.
+    gl.stencilOp(
+        /*sfail=*/ WebGL2RenderingContext.KEEP,
         /*dpfail=*/ WebGL2RenderingContext.KEEP, /*dppass=*/ WebGL2RenderingContext.REPLACE);
-    gl.stencilFuncSeparate(
-        /*face=*/ WebGL2RenderingContext.FRONT_AND_BACK, /*func=*/ WebGL2RenderingContext.ALWAYS,
+    gl.stencilFunc(
+        /*func=*/ WebGL2RenderingContext.ALWAYS,
         /*ref=*/ 1, /*mask=*/ 1);
-    gl.disable(gl.SCISSOR_TEST);
     const backgroundColor = this.viewer.perspectiveViewBackgroundColor.value;
     this.gl.clearColor(backgroundColor[0], backgroundColor[1], backgroundColor[2], 0.0);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.clear(gl.DEPTH_BUFFER_BIT);
+    gl.clearBufferfv(
+        WebGL2RenderingContext.COLOR, OffscreenTextures.COLOR,
+        [backgroundColor[0], backgroundColor[1], backgroundColor[2], 0.0]);
+    gl.clearBufferfv(WebGL2RenderingContext.COLOR, OffscreenTextures.Z, kZeroVec4);
+    gl.clearBufferfv(WebGL2RenderingContext.COLOR, OffscreenTextures.PICK, kZeroVec4);
 
     gl.enable(gl.DEPTH_TEST);
     const projectionParameters = this.projectionParameters.value;
@@ -519,6 +575,11 @@ export class PerspectivePanel extends RenderedDataPanel {
       this.drawAxisLines();
     }
 
+    // Disable stencil operations.
+    gl.stencilOp(
+        /*sfail=*/ WebGL2RenderingContext.KEEP,
+        /*dpfail=*/ WebGL2RenderingContext.KEEP, /*dppass=*/ WebGL2RenderingContext.KEEP);
+
     if (hasTransparent) {
       // Draw transparent objects.
       gl.depthMask(false);
@@ -527,9 +588,6 @@ export class PerspectivePanel extends RenderedDataPanel {
       // Compute accumulate and revealage textures.
       const {transparentConfiguration} = this;
       transparentConfiguration.bind(width, height);
-      gl.stencilOpSeparate(
-          /*face=*/ WebGL2RenderingContext.FRONT_AND_BACK, /*sfail=*/ WebGL2RenderingContext.KEEP,
-          /*dpfail=*/ WebGL2RenderingContext.KEEP, /*dppass=*/ WebGL2RenderingContext.KEEP);
       this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
       gl.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT);
       renderContext.emitter = perspectivePanelEmitOIT;
@@ -550,49 +608,55 @@ export class PerspectivePanel extends RenderedDataPanel {
       this.transparencyCopyHelper.draw(
           transparentConfiguration.colorBuffers[0].texture,
           transparentConfiguration.colorBuffers[1].texture);
-      gl.stencilOpSeparate(
-          /*face=*/ WebGL2RenderingContext.FRONT_AND_BACK, /*sfail=*/ WebGL2RenderingContext.KEEP,
-          /*dpfail=*/ WebGL2RenderingContext.KEEP, /*dppass=*/ WebGL2RenderingContext.REPLACE);
       gl.depthMask(true);
       gl.disable(WebGL2RenderingContext.BLEND);
       gl.enable(WebGL2RenderingContext.DEPTH_TEST);
 
       // Restore framebuffer attachments.
       this.offscreenFramebuffer.bind(width, height);
-    }
 
-    // Do picking only rendering pass.
-    gl.drawBuffers([gl.NONE, gl.COLOR_ATTACHMENT1, gl.COLOR_ATTACHMENT2]);
-    renderContext.emitter = perspectivePanelEmit;
-    renderContext.emitPickID = true;
-    renderContext.emitColor = false;
+      // Do picking only rendering pass for transparent layers.
+      gl.enable(WebGL2RenderingContext.STENCIL_TEST);
+      gl.drawBuffers([gl.NONE, gl.COLOR_ATTACHMENT1, gl.COLOR_ATTACHMENT2]);
+      renderContext.emitter = perspectivePanelEmit;
+      renderContext.emitPickID = true;
+      renderContext.emitColor = false;
 
-    // Offset z values forward so that we reliably write pick IDs and depth information even though
-    // we've already done one drawing pass.
-    gl.enable(WebGL2RenderingContext.POLYGON_OFFSET_FILL);
-    gl.polygonOffset(-1, -1);
-    for (const [renderLayer, attachment] of visibleLayers) {
-      if (!renderLayer.isTransparent || !renderLayer.transparentPickEnabled) {
-        continue;
+      // First, render `transparentPickEnabled=true` layers.
+
+      // Only write to positions where the stencil buffer bit 0 is unset (i.e. the ray does not
+      // intersect any opaque object), since opaque objects take precedence.  Set the stencil buffer
+      // bit 1 to ensure those positions take precedence over `transparentPickEnabled=false` layers.
+      gl.stencilFunc(
+          /*func=*/ WebGL2RenderingContext.NOTEQUAL,
+          /*ref=*/ 3, /*mask=*/ 1);
+      gl.stencilOp(
+          /*sfail=*/ WebGL2RenderingContext.KEEP,
+          /*dpfail=*/ WebGL2RenderingContext.KEEP, /*dppass=*/ WebGL2RenderingContext.REPLACE);
+      gl.stencilMask(2);
+      for (const [renderLayer, attachment] of visibleLayers) {
+        if (!renderLayer.isTransparent || !renderLayer.transparentPickEnabled) {
+          continue;
+        }
+        renderLayer.draw(renderContext, attachment);
       }
-      renderLayer.draw(renderContext, attachment);
-    }
 
-    gl.stencilFuncSeparate(
-        /*face=*/ WebGL2RenderingContext.FRONT_AND_BACK, /*func=*/ WebGL2RenderingContext.GREATER,
-        /*ref=*/ 1, /*mask=*/ 1);
-    gl.stencilOpSeparate(
-        /*face=*/ WebGL2RenderingContext.FRONT_AND_BACK, /*sfail=*/ WebGL2RenderingContext.KEEP,
-        /*dpfail=*/ WebGL2RenderingContext.KEEP, /*dppass=*/ WebGL2RenderingContext.KEEP);
-    for (const [renderLayer, attachment] of visibleLayers) {
-      if (!renderLayer.isTransparent || renderLayer.transparentPickEnabled) {
-        continue;
+      gl.stencilFunc(
+          /*func=*/ WebGL2RenderingContext.EQUAL,
+          /*ref=*/ 0, /*mask=*/ 3);
+      gl.stencilOp(
+          /*sfail=*/ WebGL2RenderingContext.KEEP,
+          /*dpfail=*/ WebGL2RenderingContext.KEEP, /*dppass=*/ WebGL2RenderingContext.KEEP);
+      gl.stencilMask(0);
+      for (const [renderLayer, attachment] of visibleLayers) {
+        if (!renderLayer.isTransparent || renderLayer.transparentPickEnabled) {
+          continue;
+        }
+        renderLayer.draw(renderContext, attachment);
       }
-      renderLayer.draw(renderContext, attachment);
     }
+    gl.stencilMask(0xffffffff);
     gl.disable(WebGL2RenderingContext.STENCIL_TEST);
-
-    gl.disable(WebGL2RenderingContext.POLYGON_OFFSET_FILL);
 
     if (this.viewer.showScaleBar.value && this.viewer.orthographicProjection.value) {
       // Only modify color buffer.
@@ -606,15 +670,15 @@ export class PerspectivePanel extends RenderedDataPanel {
       const {scaleBars} = this;
       const options = this.viewer.scaleBarOptions.value;
       scaleBars.draw(
-          width, this.navigationState.displayDimensionRenderInfo.value,
+          this.renderViewport, this.navigationState.displayDimensionRenderInfo.value,
           this.navigationState.relativeDisplayScales.value,
-          this.navigationState.zoomFactor.value / this.height, options);
+          this.navigationState.zoomFactor.value / this.renderViewport.logicalHeight, options);
       gl.disable(WebGL2RenderingContext.BLEND);
     }
     this.offscreenFramebuffer.unbind();
 
     // Draw the texture over the whole viewport.
-    this.setGLViewport();
+    this.setGLClippedViewport();
     this.offscreenCopyHelper.draw(
         this.offscreenFramebuffer.colorBuffers[OffscreenTextures.COLOR].texture);
     return true;
@@ -666,25 +730,17 @@ export class PerspectivePanel extends RenderedDataPanel {
 
   protected drawAxisLines() {
     const {
-      position: {value: position},
       zoomFactor: {value: zoom},
-      displayDimensionRenderInfo: {value: {canonicalVoxelFactors, displayDimensionIndices}}
     } = this.viewer.navigationState;
-    const axisRatio = Math.min(this.width, this.height) / this.height / 4;
+    const projectionParameters = this.projectionParameters.value;
+    const axisRatio =
+        Math.min(projectionParameters.logicalWidth, projectionParameters.logicalHeight) /
+        this.renderViewport.logicalHeight / 4;
     const axisLength = zoom * axisRatio;
-    const mat = tempMat4;
-    // Construct matrix that maps [-1, +1] x/y range to the full viewport data
-    // coordinates.
-    mat4.identity(mat);
-    for (let i = 0; i < 3; ++i) {
-      const globalDim = displayDimensionIndices[i];
-      mat[12 + i] = globalDim === -1 ? 0 : position[globalDim];
-      mat[5 * i] = axisLength / canonicalVoxelFactors[i];
-    }
-    mat4.multiply(mat, this.projectionParameters.value.viewProjectionMat, mat);
     const {gl} = this;
     gl.drawBuffers([gl.COLOR_ATTACHMENT0]);
-    this.axesLineHelper.draw(mat, false);
+    this.axesLineHelper.draw(
+        computeAxisLineMatrix(projectionParameters, axisLength), /*blend=*/ false);
   }
 
   zoomByMouse(factor: number) {

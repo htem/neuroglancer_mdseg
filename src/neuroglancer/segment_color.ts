@@ -58,8 +58,8 @@ vec3 ${this.prefix}(uint64_t x) {
     builder.addFragmentCode(s);
   }
 
-  enable(gl: GL, shader: ShaderProgram, segmentColorHash: SegmentColorHash) {
-    gl.uniform1ui(shader.uniform(this.seedName), segmentColorHash.hashSeed);
+  enable(gl: GL, shader: ShaderProgram, segmentColorHash: number) {
+    gl.uniform1ui(shader.uniform(this.seedName), segmentColorHash);
   }
 }
 
@@ -76,6 +76,17 @@ export class SegmentColorHash implements Trackable {
 
   static getDefault() {
     return new SegmentColorHash(0);
+  }
+
+  get value() {
+    return this.hashSeed;
+  }
+
+  set value(value: number) {
+    if (value !== this.hashSeed) {
+      this.hashSeed = value;
+      this.changed.dispatch();
+    }
   }
 
   compute(out: Float32Array, x: Uint64) {
@@ -133,9 +144,9 @@ bool ${this.getFunctionName}(uint64_t x, out vec3 value) {
   uint64_t uint64Value;
   if (${this.hashMapShaderManager.getFunctionName}(x, uint64Value)) {
     uint uintValue = uint64Value.value[0];
-    value.x = float((uintValue & 0xff0000u) >> 16) / 255.0;
-    value.y = float((uintValue & 0x00ff00u) >>  8) / 255.0;
-    value.z = float((uintValue & 0x0000ffu))       / 255.0;
+    value.r = float((uintValue & 0x0000ffu))       / 255.0;
+    value.g = float((uintValue & 0x00ff00u) >>  8) / 255.0;
+    value.b = float((uintValue & 0xff0000u) >> 16) / 255.0;
     return true;
   }
   return false;

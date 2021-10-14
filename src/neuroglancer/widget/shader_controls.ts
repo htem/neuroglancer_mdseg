@@ -15,20 +15,100 @@
  */
 
 import debounce from 'lodash/debounce';
-import {TrackableRGB} from 'neuroglancer/util/color';
+import {DisplayContext} from 'neuroglancer/display_context';
+import {UserLayer, UserLayerConstructor} from 'neuroglancer/layer';
+import {registerLayerTool, ToolActivation} from 'neuroglancer/ui/tool';
 import {RefCounted} from 'neuroglancer/util/disposable';
 import {removeChildren} from 'neuroglancer/util/dom';
+import {verifyObjectProperty, verifyString} from 'neuroglancer/util/json';
+import {AnyConstructor} from 'neuroglancer/util/mixin';
+import {WatchableVisibilityPriority} from 'neuroglancer/visibility_priority/frontend';
+import {ParameterizedEmitterDependentShaderOptions, ParameterizedShaderGetterResult} from 'neuroglancer/webgl/dynamic_shader';
 import {ShaderControlState} from 'neuroglancer/webgl/shader_ui_controls';
-import {ColorWidget} from 'neuroglancer/widget/color';
-import {RangeWidget} from 'neuroglancer/widget/range';
+import {addLayerControlToOptionsTab, LayerControlDefinition, LayerControlFactory, LayerControlTool} from 'neuroglancer/widget/layer_control';
+import {channelInvlerpLayerControl} from 'neuroglancer/widget/layer_control_channel_invlerp';
+import {checkboxLayerControl} from 'neuroglancer/widget/layer_control_checkbox';
+import {colorLayerControl} from 'neuroglancer/widget/layer_control_color';
+import {rangeLayerControl} from 'neuroglancer/widget/layer_control_range';
+import {Tab} from 'neuroglancer/widget/tab_view';
 
+export interface LegendShaderOptions extends ParameterizedEmitterDependentShaderOptions {
+  initializeShader: (shaderResult: ParameterizedShaderGetterResult) => void;
+}
 
-export class ShaderControls extends RefCounted {
-  element = document.createElement('div');
+export interface ShaderControlsOptions {
+  legendShaderOptions?: LegendShaderOptions;
+  visibility?: WatchableVisibilityPriority;
+  toolId?: string;
+}
+
+function getShaderLayerControlFactory<LayerType extends UserLayer>(
+    layerShaderControls: LayerShaderControls, controlId: string): LayerControlFactory<LayerType>|
+    undefined {
+  const {shaderControlState} = layerShaderControls;
+  const controlState = shaderControlState.state.get(controlId);
+  if (controlState === undefined) return undefined;
+  const {control} = controlState;
+  switch (control.type) {
+    case 'slider':
+      return rangeLayerControl(() => ({
+                                 value: controlState.trackable,
+                                 options: {min: control.min, max: control.max, step: control.step},
+                               }));
+    case 'color':
+      return colorLayerControl(() => controlState.trackable);
+    case 'checkbox':
+      return checkboxLayerControl(() => controlState.trackable);
+    case 'invlerp': {
+      let histogramIndex = 0;
+      for (const [otherName, {control: {type: otherType}}] of shaderControlState.state) {
+        if (otherName === controlId) break;
+        if (otherType === 'invlerp') ++histogramIndex;
+      }
+      return channelInvlerpLayerControl(
+          () => ({
+            dataType: control.dataType,
+            defaultChannel: control.default.channel,
+            watchableValue: controlState.trackable,
+            channelCoordinateSpaceCombiner: shaderControlState.channelCoordinateSpaceCombiner,
+            histogramSpecifications: shaderControlState.histogramSpecifications,
+            histogramIndex,
+            legendShaderOptions: layerShaderControls.legendShaderOptions,
+          }));
+    }
+  }
+}
+
+function getShaderLayerControlDefinition<LayerType extends UserLayer>(
+    getter: (layer: LayerType) => LayerShaderControls, toolId: string,
+    controlId: string): LayerControlDefinition<LayerType> {
+  return {
+    label: controlId,
+    toolJson: shaderControlToolJson(controlId, toolId),
+    makeControl: (layer, context, options) => {
+      const layerShaderControls = getter(layer);
+      return getShaderLayerControlFactory(layerShaderControls, controlId)!.makeControl(
+          layer, context, options);
+    },
+    activateTool: (activation, control) => {
+      const layerShaderControls = getter(activation.tool.layer);
+      return getShaderLayerControlFactory(layerShaderControls, controlId)!.activateTool(
+          activation, control);
+    },
+  };
+}
+
+export class ShaderControls extends Tab {
   private controlDisposer: RefCounted|undefined = undefined;
-
-  constructor(public state: ShaderControlState) {
-    super();
+  private toolId: string;
+  constructor(
+      public state: ShaderControlState, public display: DisplayContext, public layer: UserLayer,
+      public options: ShaderControlsOptions = {}) {
+    super(options.visibility);
+    const {toolId = SHADER_CONTROL_TOOL_ID} = options;
+    this.toolId = toolId;
+    const {element} = this;
+    element.style.display = 'contents';
     const {controls} = state;
     this.registerDisposer(
         controls.changed.add(this.registerCancellable(debounce(() => this.updateControls(), 0))));
@@ -36,39 +116,66 @@ export class ShaderControls extends RefCounted {
   }
 
   updateControls() {
+    const {element} = this;
     if (this.controlDisposer !== undefined) {
       this.controlDisposer.dispose();
-      removeChildren(this.element);
+      removeChildren(element);
     }
     const controlDisposer = this.controlDisposer = new RefCounted();
-    for (const [name, controlState] of this.state.state) {
-      const {control} = controlState;
-      switch (control.type) {
-        case 'slider': {
-          const widget = controlDisposer.registerDisposer(new RangeWidget(
-              controlState.trackable, {min: control.min, max: control.max, step: control.step}));
-          widget.promptElement.textContent = name;
-          this.element.appendChild(widget.element);
-          break;
-        }
-        case 'color': {
-          const label = document.createElement('label');
-          label.textContent = name;
-          const widget = controlDisposer.registerDisposer(
-              new ColorWidget(controlState.trackable as TrackableRGB));
-          this.element.appendChild(label);
-          label.appendChild(widget.element);
-          break;
-        }
-      }
+    const layerShaderControlsGetter = () => ({
+      shaderControlState: this.state,
+      legendShaderOptions: this.options.legendShaderOptions,
+    });
+    for (const name of this.state.state.keys()) {
+      element.appendChild(addLayerControlToOptionsTab(
+          controlDisposer, this.layer, this.visibility,
+          getShaderLayerControlDefinition(layerShaderControlsGetter, this.toolId, name)));
     }
   }
 
   disposed() {
-    const {controlDisposer} = this;
-    if (controlDisposer !== undefined) {
-      controlDisposer.dispose();
-    }
+    this.controlDisposer?.dispose();
     super.disposed();
   }
+}
+
+interface LayerShaderControls {
+  shaderControlState: ShaderControlState;
+  legendShaderOptions?: LegendShaderOptions;
+}
+
+export const SHADER_CONTROL_TOOL_ID = 'shaderControl';
+const CONTROL_JSON_KEY = 'control';
+
+function shaderControlToolJson(control: string, toolId: string) {
+  return {type: toolId, [CONTROL_JSON_KEY]: control};
+}
+
+class ShaderControlTool extends LayerControlTool {
+  constructor(
+      layer: UserLayer, private layerShaderControls: LayerShaderControls, toolId: string,
+      private control: string) {
+    super(layer, getShaderLayerControlDefinition(() => layerShaderControls, toolId, control));
+    this.registerDisposer(layerShaderControls.shaderControlState.controls.changed.add(
+        this.registerCancellable(debounce(() => {
+          if (layerShaderControls.shaderControlState.state.get(control) === undefined) {
+            this.unbind();
+          }
+        }))));
+  }
+  activate(activation: ToolActivation<this>) {
+    const {shaderControlState} = this.layerShaderControls;
+    const controlState = shaderControlState.state.get(this.control);
+    if (controlState === undefined) return;
+    super.activate(activation);
+  }
+}
+
+export function registerLayerShaderControlsTool<LayerType extends UserLayer>(
+    layerType: UserLayerConstructor&AnyConstructor<LayerType>,
+    getter: (layer: LayerType) => LayerShaderControls, toolId: string = SHADER_CONTROL_TOOL_ID) {
+  registerLayerTool(layerType, toolId, (layer, options) => {
+    const control = verifyObjectProperty(options, CONTROL_JSON_KEY, verifyString);
+    return new ShaderControlTool(layer, getter(layer), toolId, control);
+  });
 }

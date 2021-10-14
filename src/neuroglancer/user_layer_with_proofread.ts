@@ -22,7 +22,7 @@ import {ProofreadTab} from 'neuroglancer/widget/proofread_tab';
 
 
 const PROOFREAD_TAB_NAME = 'Proofread';
-const PROOFREAD_KEY = 'pr';
+// const PROOFREAD_KEY = 'pr';
 // const NEURONDB_KEY = 'neurondb';
 // const SEARCH_TAB_NAME = 'Search DB';
 
@@ -48,14 +48,14 @@ export function UserLayerWithProofreadMixin<TBase extends {new (...args: any[]):
         order: 100,
         getter: () => new ProofreadTab(this.pr)
       });
-      const specification = args[1];
-      this.pr.restoreState(specification[PROOFREAD_KEY]);
+      // const specification = args[1];
+      // this.pr.restoreState(specification[PROOFREAD_KEY]);
 
 
     }
     toJSON(): any {
       const x = super.toJSON();
-      x[PROOFREAD_KEY] = this.pr.toJSON();
+      // x[PROOFREAD_KEY] = this.pr.toJSON();
       return x;
     }
   }

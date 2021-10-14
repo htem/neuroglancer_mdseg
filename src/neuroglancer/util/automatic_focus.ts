@@ -30,12 +30,15 @@ class AutomaticFocusList {
 
 const automaticFocusList = new AutomaticFocusList();
 
+const isTopLevel = window.top === window;
+
 const maybeUpdateFocus = debounce(() => {
+  if (!isTopLevel) return;
   const {activeElement} = document;
   if (activeElement === null || activeElement === document.body) {
     const node = LinkedListOperations.front<AutomaticallyFocusedElement>(<any>automaticFocusList);
     if (node !== null) {
-      node.element.focus();
+      node.element.focus({preventScroll: true});
     }
   }
 });
@@ -63,7 +66,7 @@ export class AutomaticallyFocusedElement extends RefCounted {
     }
     if (activeElement != null &&
         (activeElement === this.lastFocusedElement || activeElement.contains(element))) {
-      this.element.focus();
+      this.element.focus({preventScroll: true});
     }
     this.lastFocusedElement = null;
   }, 0));
@@ -74,7 +77,7 @@ export class AutomaticallyFocusedElement extends RefCounted {
     this.registerEventListener(element, 'pointerdown', event => {
       if (event.target !== element) return;
       this.lastFocusedElement = null;
-      element.focus();
+      element.focus({preventScroll: true});
     });
     this.registerEventListener(element, 'mouseenter', () => {
       this.lastFocusedElement = document.activeElement;

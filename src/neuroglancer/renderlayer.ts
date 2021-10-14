@@ -16,7 +16,8 @@
 
 import debounce from 'lodash/debounce';
 import {LayerChunkProgressInfo} from 'neuroglancer/chunk_manager/base';
-import {LayerView, MouseSelectionState, VisibleLayerInfo} from 'neuroglancer/layer';
+import {RenderViewport, renderViewportsEqual} from 'neuroglancer/display_context';
+import {LayerView, MouseSelectionState, PickState, UserLayer, VisibleLayerInfo} from 'neuroglancer/layer';
 import {DisplayDimensionRenderInfo, NavigationState} from 'neuroglancer/navigation_state';
 import {PickIDManager} from 'neuroglancer/object_picking';
 import {ProjectionParameters, projectionParametersEqual} from 'neuroglancer/projection_parameters';
@@ -43,6 +44,7 @@ export function allRenderLayerRoles() {
 }
 
 export class RenderLayer extends RefCounted {
+  userLayer: UserLayer|undefined;
   role: RenderLayerRole = RenderLayerRole.DATA;
   messages = new MessageList();
   layerChanged = new NullarySignal();
@@ -61,8 +63,8 @@ export class RenderLayer extends RefCounted {
    * Transform the stored pickedValue and offset associated with the retrieved pick ID into the
    * actual value.
    */
-  transformPickedValue(pickedValue: Uint64, _pickedOffset: number): any {
-    return pickedValue;
+  transformPickedValue(pickState: PickState): any {
+    return pickState.pickedValue;
   }
 
   /**
@@ -132,8 +134,8 @@ export class DerivedProjectionParameters<Parameters extends ProjectionParameters
     RefCounted implements WatchableValueChangeInterface<Parameters> {
   private oldValue_: Parameters;
   private value_: Parameters;
-  private width: number = 0;
-  private height: number = 0;
+  private renderViewport = new RenderViewport();
+
   changed = new Signal<(oldValue: Parameters, newValue: Parameters) => void>();
   constructor(options: {
     navigationState: Borrowed<NavigationState>,
@@ -153,8 +155,7 @@ export class DerivedProjectionParameters<Parameters extends ProjectionParameters
     const performUpdate = () => {
       const {oldValue_, value_} = this;
       oldValue_.displayDimensionRenderInfo = navigationState.displayDimensionRenderInfo.value;
-      oldValue_.width = this.width;
-      oldValue_.height = this.height;
+      Object.assign(oldValue_, this.renderViewport);
       let {globalPosition} = oldValue_;
       const newGlobalPosition = navigationState.position.value;
       const rank = newGlobalPosition.length;
@@ -173,10 +174,9 @@ export class DerivedProjectionParameters<Parameters extends ProjectionParameters
     performUpdate();
   }
 
-  setViewportShape(width: number, height: number) {
-    if (this.width === width && this.height === height) return;
-    this.width = width;
-    this.height = height;
+  setViewport(viewport: RenderViewport) {
+    if (renderViewportsEqual(viewport, this.renderViewport)) return;
+    Object.assign(this.renderViewport, viewport);
     this.update();
   }
 
@@ -191,6 +191,7 @@ export class DerivedProjectionParameters<Parameters extends ProjectionParameters
 @registerSharedObjectOwner(PROJECTION_PARAMETERS_RPC_ID)
 export class SharedProjectionParameters<T extends ProjectionParameters =
                                                       ProjectionParameters> extends SharedObject {
+  private prevDisplayDimensionRenderInfo: undefined|DisplayDimensionRenderInfo = undefined;
   constructor(
       rpc: RPC, public base: WatchableValueChangeInterface<T>, public updateInterval: number = 10) {
     super();
@@ -202,10 +203,13 @@ export class SharedProjectionParameters<T extends ProjectionParameters =
     this.update.flush();
   }
 
-  private update = this.registerCancellable(debounce((oldValue: T, newValue: T) => {
+  private update = this.registerCancellable(debounce((_oldValue: T, newValue: T) => {
+    // Note: Because we are using debouce, we cannot rely on `_oldValue`, since
+    // `DerivedProjectionParameters` reuses the objects.
     let valueUpdate: any;
-    if (newValue.displayDimensionRenderInfo !== oldValue.displayDimensionRenderInfo) {
+    if (newValue.displayDimensionRenderInfo !== this.prevDisplayDimensionRenderInfo) {
       valueUpdate = newValue;
+      this.prevDisplayDimensionRenderInfo = newValue.displayDimensionRenderInfo;
     } else {
       const {displayDimensionRenderInfo, ...remainder} = newValue;
       valueUpdate = remainder;

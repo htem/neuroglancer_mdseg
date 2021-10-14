@@ -27,8 +27,8 @@ import {removeChildren, removeFromParent} from 'neuroglancer/util/dom';
 import {makeHelpButton} from 'neuroglancer/widget/help_button';
 import {makeMaximizeButton} from 'neuroglancer/widget/maximize_button';
 import {ShaderCodeWidget} from 'neuroglancer/widget/shader_code_widget';
+import {registerLayerShaderControlsTool, ShaderControls} from 'neuroglancer/widget/shader_controls';
 import {Tab} from 'neuroglancer/widget/tab_view';
-import { ShaderControls } from './widget/shader_controls';
 
 const SHADER_JSON_KEY = 'shader';
 const SHADER_CONTROLS_JSON_KEY = 'shaderControls';
@@ -36,8 +36,8 @@ const SHADER_CONTROLS_JSON_KEY = 'shaderControls';
 export class SingleMeshUserLayer extends UserLayer {
   displayState = new SingleMeshDisplayState();
   vertexAttributes = new WatchableValue<VertexAttributeInfo[]|undefined>(undefined);
-  constructor(public managedLayer: Borrowed<ManagedUserLayer>, specification: any) {
-    super(managedLayer, specification);
+  constructor(public managedLayer: Borrowed<ManagedUserLayer>) {
+    super(managedLayer);
     this.registerDisposer(
         this.displayState.shaderControlState.changed.add(this.specificationChanged.dispatch));
     this.registerDisposer(
@@ -87,6 +87,7 @@ export class SingleMeshUserLayer extends UserLayer {
   }
 
   static type = 'mesh';
+  static typeAbbreviation = 'mesh';
 }
 
 function makeShaderCodeWidget(layer: SingleMeshUserLayer) {
@@ -176,8 +177,11 @@ class DisplayOptionsTab extends Tab {
     element.appendChild(topRow);
     element.appendChild(this.attributeWidget.element);
     element.appendChild(this.codeWidget.element);
-    element.appendChild(
-        this.registerDisposer(new ShaderControls(layer.displayState.shaderControlState)).element);
+    element.appendChild(this.registerDisposer(new ShaderControls(
+                                                  layer.displayState.shaderControlState,
+                                                  this.layer.manager.root.display, this.layer,
+                                                  {visibility: this.visibility}))
+                            .element);
   }
 }
 
@@ -193,8 +197,15 @@ class ShaderCodeOverlay extends Overlay {
   }
 }
 
-registerLayerType('mesh', SingleMeshUserLayer);
+registerLayerType(SingleMeshUserLayer);
 registerLayerTypeDetector(subsource => {
-  if (subsource.singleMesh !== undefined) return SingleMeshUserLayer;
+  if (subsource.singleMesh !== undefined) {
+    return {layerConstructor: SingleMeshUserLayer, priority: 2};
+  }
   return undefined;
 });
+
+registerLayerShaderControlsTool(
+    SingleMeshUserLayer, layer => ({
+                           shaderControlState: layer.displayState.shaderControlState,
+                         }));

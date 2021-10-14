@@ -34,10 +34,12 @@ import {TrackableValue} from 'neuroglancer/trackable_value';
 import {bindDefaultCopyHandler, bindDefaultPasteHandler} from 'neuroglancer/ui/default_clipboard_handling';
 import {setDefaultInputEventBindings} from 'neuroglancer/ui/default_input_event_bindings';
 import {makeDefaultViewer} from 'neuroglancer/ui/default_viewer';
+import {bindTitle} from 'neuroglancer/ui/title';
 import {UrlHashBinding} from 'neuroglancer/ui/url_hash_binding';
 import {parseFixedLengthArray, verifyInt} from 'neuroglancer/util/json';
-import {CompoundTrackable, getCachedJson, Trackable} from 'neuroglancer/util/trackable';
-import {InputEventBindings} from 'neuroglancer/viewer';
+import {CompoundTrackable, Trackable} from 'neuroglancer/util/trackable';
+import {InputEventBindings, VIEWER_UI_CONFIG_OPTIONS} from 'neuroglancer/viewer';
+import {getCachedJson} from 'neuroglancer/util/trackable';
 
 export function makeTrackableBasedEventActionMaps(inputEventBindings: InputEventBindings) {
   const config = new CompoundTrackable();
@@ -124,7 +126,8 @@ window.addEventListener('DOMContentLoaded', () => {
   let sharedState: Trackable|undefined = viewer.state;
 
   if (window.location.hash) {
-    const hashBinding = viewer.registerDisposer(new UrlHashBinding(viewer.state));
+    const hashBinding =
+        viewer.registerDisposer(new UrlHashBinding(viewer.state, credentialsManager));
     hashBinding.updateFromUrlHash();
     sharedState = undefined;
   }
@@ -133,12 +136,9 @@ window.addEventListener('DOMContentLoaded', () => {
       viewer.display, dataSourceProvider, viewer.dataContext.addRef(), viewer.uiConfiguration);
   configState.add('prefetch', prefetchManager);
 
-  configState.add('showUIControls', viewer.uiConfiguration.showUIControls);
-  configState.add('showLayerPanel', viewer.uiConfiguration.showLayerPanel);
-  configState.add('showHelpButton', viewer.uiConfiguration.showHelpButton);
-  configState.add('showLocation', viewer.uiConfiguration.showLocation);
-  configState.add('showPanelBorders', viewer.uiConfiguration.showPanelBorders);
-  configState.add('showLayerHoverValues', viewer.uiConfiguration.showLayerHoverValues);
+  for (const key of VIEWER_UI_CONFIG_OPTIONS) {
+    configState.add(key, viewer.uiConfiguration[key]);
+  }
   configState.add('scaleBarOptions', viewer.scaleBarOptions);
   const size = new TrackableValue<[number, number]|undefined>(
       undefined,
@@ -176,6 +176,8 @@ window.addEventListener('DOMContentLoaded', () => {
       (action, state) => serverConnection.sendActionNotification(action, state));
   screenshotHandler.sendScreenshotRequested.add(
       state => serverConnection.sendActionNotification('screenshot', state));
+  screenshotHandler.sendStatisticsRequested.add(
+      state => serverConnection.sendActionNotification('screenshotStatistics', state));
 
   document.addEventListener('clSetVal',()=> {
     remoteActionHandler.sendActionRequested.dispatch('set-color',JSON.parse(JSON.stringify(getCachedJson(viewer.state).value)));
@@ -209,4 +211,5 @@ window.addEventListener('DOMContentLoaded', () => {
   });
   bindDefaultCopyHandler(viewer);
   bindDefaultPasteHandler(viewer);
+  viewer.registerDisposer(bindTitle(viewer.title));
 });

@@ -5,6 +5,7 @@ import argparse
 import numpy as np
 
 import neuroglancer
+import neuroglancer.cli
 
 voxel_size = np.array([10, 10, 10])
 
@@ -28,7 +29,7 @@ class SkeletonSource(neuroglancer.skeleton.SkeletonSource):
     def get_skeleton(self, i):
         pos = np.unravel_index(i, shape, order='C')
         vertex_positions = [pos, pos + np.random.randn(3) * 30]
-        edges = [0, 1]
+        edges = [[0, 1]]
         return neuroglancer.skeleton.Skeleton(
             vertex_positions=vertex_positions,
             edges=edges,
@@ -69,12 +70,7 @@ with viewer.txn() as s:
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('--static-content-url')
-    ap.add_argument('-a', '--bind-address')
+    neuroglancer.cli.add_server_arguments(ap)
     args = ap.parse_args()
-    neuroglancer.server.debug = True
-    if args.bind_address:
-        neuroglancer.set_server_bind_address(args.bind_address)
-    if args.static_content_url:
-        neuroglancer.set_static_content_source(url=args.static_content_url)
+    neuroglancer.cli.handle_server_arguments(args)
     print(viewer)

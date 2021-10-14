@@ -84,14 +84,6 @@ class PythonMeshSource extends
 export function computeNearIsotropicDownsamplingLevels(
     shape: Float32Array, downsampleDims: readonly number[], effectiveVoxelSize: Float32Array,
     maxDownsampling: number, maxDownsamplingScales: number, maxDownsampledSize: number) {
-  console.log({
-    shape,
-    downsampleDims,
-    effectiveVoxelSize,
-    maxDownsampling,
-    maxDownsamplingScales,
-    maxDownsampledSize
-  });
   const rank = shape.length;
   const curDownsampleFactors = new Float32Array(rank);
   curDownsampleFactors.fill(1);
@@ -135,6 +127,12 @@ function parseCoordinateSpaceAndVoxelOffset(response: any) {
     valid: true
   };
   const {rank} = baseModelSpace;
+  // Mark all coordinate arrays as implicit, since they are obtained from the data source and need
+  // not be preserved in the Neuroglancer JSON state.
+  baseModelSpace.coordinateArrays.forEach(coordinateArray => {
+    if (coordinateArray === undefined) return;
+    coordinateArray.explicit = false;
+  });
   const subsourceToModelTransform =
       matrix.identity(new Float32Array((rank + 1) * (rank + 1)), rank + 1, rank + 1);
 
@@ -211,6 +209,7 @@ export class PythonMultiscaleVolumeChunkSource extends MultiscaleVolumeChunkSour
       scales: baseModelSpace.scales,
       units: baseModelSpace.units,
       boundingBoxes: [makeIdentityTransformedBoundingBox(box)],
+      coordinateArrays: baseModelSpace.coordinateArrays,
     });
     this.modelSpace = modelSpace;
     this.generation = verifyObjectProperty(response, 'generation', x => x);
@@ -348,7 +347,7 @@ function getVolumeDataSource(
     dataSourceProvider: PythonDataSource, options: GetDataSourceOptions, key: string) {
   return options.chunkManager.memoize.getUncounted(
       {'type': 'python:VolumeDataSource', key}, async () => {
-        const response = await (await fetchOk(`/neuroglancer/info/${key}`)).json();
+        const response = await (await fetchOk(`../../neuroglancer/info/${key}`)).json();
         const volume = new PythonMultiscaleVolumeChunkSource(
             dataSourceProvider, options.chunkManager, key, response);
         const dataSource: DataSource = {
@@ -399,7 +398,7 @@ function getSkeletonDataSource(
     dataSourceProvider: PythonDataSource, options: GetDataSourceOptions, key: string) {
   return options.chunkManager.memoize.getUncounted(
       {'type': 'python:SkeletonDataSource', key}, async () => {
-        const response = await (await fetchOk(`/neuroglancer/skeletoninfo/${key}`)).json();
+        const response = await (await fetchOk(`../../neuroglancer/skeletoninfo/${key}`)).json();
         const {baseModelSpace, subsourceToModelTransform} =
             parseCoordinateSpaceAndVoxelOffset(response);
         const vertexAttributes = verifyObjectProperty(

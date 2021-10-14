@@ -23,13 +23,14 @@ import {WatchableValueInterface} from 'neuroglancer/trackable_value';
 import {RefCounted} from 'neuroglancer/util/disposable';
 import {mat4} from 'neuroglancer/util/geom';
 import {Buffer} from 'neuroglancer/webgl/buffer';
+import {glsl_COLORMAPS} from 'neuroglancer/webgl/colormaps';
 import {GL} from 'neuroglancer/webgl/context';
 import {ParameterizedContextDependentShaderGetter, parameterizedEmitterDependentShaderGetter, shaderCodeWithLineDirective, WatchableShaderError} from 'neuroglancer/webgl/dynamic_shader';
 import {ShaderBuilder, ShaderModule, ShaderProgram} from 'neuroglancer/webgl/shader';
-import {addControlsToBuilder, setControlsInShader, ShaderControlsParseResult, ShaderControlState} from 'neuroglancer/webgl/shader_ui_controls';
+import {addControlsToBuilder, setControlsInShader, ShaderControlsBuilderState, ShaderControlState} from 'neuroglancer/webgl/shader_ui_controls';
 
 export type AnnotationShaderGetter =
-    ParameterizedContextDependentShaderGetter<ShaderModule, ShaderControlsParseResult>;
+    ParameterizedContextDependentShaderGetter<ShaderModule, ShaderControlsBuilderState>;
 
 export interface AnnotationRenderContext {
   buffer: Buffer;
@@ -134,7 +135,7 @@ export abstract class AnnotationRenderHelper extends RefCounted {
       public gl: GL, public annotationType: AnnotationType, public rank: number,
       public properties: readonly Readonly<AnnotationPropertySpec>[],
       public shaderControlState: ShaderControlState,
-      public fallbackShaderParameters: WatchableValueInterface<ShaderControlsParseResult>,
+      public fallbackShaderParameters: WatchableValueInterface<ShaderControlsBuilderState>,
       public shaderError: WatchableShaderError) {
     super();
     const serializedGeometryBytesPerAnnotation = this.serializedGeometryBytesPerAnnotation =
@@ -154,21 +155,28 @@ export abstract class AnnotationRenderHelper extends RefCounted {
         targetIsSliceView: this.targetIsSliceView,
         type: this.annotationType,
         subType: memoizeKey,
-        properties: this.properties
+        properties: this.properties,
+        rank: this.rank,
       },
       fallbackParameters: this.fallbackShaderParameters,
-      parameters: this.shaderControlState.parseResult,
+      parameters: this.shaderControlState.builderState,
       shaderError: this.shaderError,
-      defineShader: (builder, parameters) => {
+      defineShader: (builder: ShaderBuilder, parameters: ShaderControlsBuilderState) => {
         const {rank, properties} = this;
-        for (const property of properties) {
+        const referencedProperties: number[] = [];
+        const processedCode = parameters.parseResult.code;
+        for (let i = 0, numProperties = properties.length; i < numProperties; ++i) {
+          const property = properties[i];
+          const functionName = `prop_${property.identifier}`;
+          if (!processedCode.match(new RegExp(`\\b${functionName}\\b`))) continue;
+          referencedProperties.push(i);
           const handler = annotationPropertyTypeRenderHandlers[property.type];
           handler.defineShader(builder, property.identifier, rank);
         }
         const {propertyOffsets} = this;
         builder.addInitializer(shader => {
-          const binders = this.properties.map(
-              property => shader.vertexShaderInputBinders[`prop_${property.identifier}`]);
+          const binders = referencedProperties.map(
+              i => shader.vertexShaderInputBinders[`prop_${properties[i].identifier}`]);
           const numProperties = binders.length;
           shader.vertexShaderInputBinders['properties'] = {
             enable(divisor: number) {
@@ -178,7 +186,7 @@ export abstract class AnnotationRenderHelper extends RefCounted {
             },
             bind(stride: number, offset: number) {
               for (let i = 0; i < numProperties; ++i) {
-                binders[i].bind(stride, offset + propertyOffsets[i]);
+                binders[i].bind(stride, offset + propertyOffsets[referencedProperties[i]]);
               }
             },
             disable() {
@@ -201,6 +209,9 @@ export abstract class AnnotationRenderHelper extends RefCounted {
         builder.addUniform('highp float', 'uModelClipBounds', rank * 2);
         builder.addUniform('highp uint', 'uPickID');
         builder.addVarying('highp uint', 'vPickID', 'flat');
+
+        builder.addVertexCode(glsl_COLORMAPS);
+
         builder.addVertexCode(`
 vec3 defaultColor() { return uColor; }
 highp uint getPickBaseOffset() { return uint(gl_InstanceID) * ${this.pickIdsPerInstance}u; }
@@ -259,7 +270,7 @@ float getMaxSubspaceClipCoefficient(float modelPointA[${this.rank}],  float mode
 }
 
 `);
-        addControlsToBuilder(parameters.controls, builder);
+        addControlsToBuilder(parameters, builder);
         builder.addVertexCode(`
 const bool PROJECTION_VIEW = ${!this.targetIsSliceView};
 bool ng_discardValue;
@@ -323,7 +334,7 @@ void userMain();
         }
         defineShader(builder);
         builder.addVertexCode(
-            `\n#define main userMain\n` + shaderCodeWithLineDirective(parameters.code) +
+            `\n#define main userMain\n` + shaderCodeWithLineDirective(parameters.parseResult.code) +
             `\n#undef main\n`);
       },
     });
@@ -385,7 +396,7 @@ if (ng_discardValue) {
     const {gl} = this;
     const {renderContext} = context;
     const {annotationLayer} = context;
-    setControlsInShader(gl, shader, this.shaderControlState, parameters.controls);
+    setControlsInShader(gl, shader, this.shaderControlState, parameters.parseResult.controls);
     gl.uniform3fv(shader.uniform('uSubspaceMatrix'), context.subspaceMatrix);
     gl.uniform1fv(shader.uniform('uModelClipBounds'), context.modelClipBounds);
     gl.uniformMatrix4fv(
@@ -416,7 +427,7 @@ interface AnnotationRenderHelperConstructor {
   new(gl: GL, annotationType: AnnotationType, rank: number,
       properties: readonly Readonly<AnnotationPropertySpec>[],
       shaderControlState: ShaderControlState,
-      fallbackShaderParameters: WatchableValueInterface<ShaderControlsParseResult>,
+      fallbackShaderParameters: WatchableValueInterface<ShaderControlsBuilderState>,
       shaderError: WatchableShaderError): AnnotationRenderHelper;
 }
 
