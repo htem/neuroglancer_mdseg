@@ -61,6 +61,8 @@ import {makeMoveToButton} from 'neuroglancer/widget/move_to_button';
 import {Tab} from 'neuroglancer/widget/tab_view';
 import {VirtualList, VirtualListSource} from 'neuroglancer/widget/virtual_list';
 
+const Papa = require('papaparse');
+
 export class MergedAnnotationStates extends RefCounted implements
     WatchableValueInterface<readonly AnnotationLayerState[]> {
   changed = new NullarySignal();
@@ -188,6 +190,17 @@ export class AnnotationLayerView extends Tab {
 
   get annotationStates() {
     return this.layer.annotationStates;
+  }
+
+   /* Returns the list of JSONs in the annotation list for exportation to a csv. Ignores the element's state because I don't know what it does?? */
+  getListElements() {
+    let copy = [];
+    for (const ann of this.listElements) {
+      // need to get just the annotation not the state
+      copy.push(ann.annotation);
+    }
+
+    return copy;
   }
 
   private attachedAnnotationStates =
@@ -772,6 +785,228 @@ export class AnnotationTab extends Tab {
     const {element} = this;
     element.classList.add('neuroglancer-annotations-tab');
     element.appendChild(this.layerView.element);
+
+    const exportToCSVButton = makeIcon({
+      text: 'Export to csv',
+      title: 'Export to csv',
+      onClick: () => {
+        this.exportToCSV();
+      }
+    });
+    element.appendChild(exportToCSVButton);
+
+    const importFromCSVButton = makeIcon({
+      text: 'Import from csv',
+      title: 'Import from csv',
+      onClick: () => {
+        this.importFromCSV();
+      }
+    });
+    element.appendChild(importFromCSVButton);
+  }
+
+  // exports only the annotations for this layer
+  private exportToCSV() {
+    let annotations = this.layerView.getListElements();
+    //console.log(annotations);
+
+    let csvString = "ID,Type,Coordinate 1,Coordinate 2,Ellipsoid Radii,Description,Properties,Related Segments\n"
+
+    // prompt user for filepath before getting all the annotations
+    let filepath = prompt("Enter filename");
+
+    for (const ann of annotations) {
+
+      if (ann["type"] === 0) {
+        csvString += ann["id"] + ',' + "point" + ',' + this.coordParser(ann["point"].toString()) + ',' + '' + ',' + '' + ',' + this.handleUndefined(ann["description"]) + ',' +  this.handleUndefined(ann["properties"]) + ',' +  this.handleUndefined(ann["relatedSegments"]) + "\n";
+      } 
+      else if (ann["type"] === 1) {
+        csvString += ann["id"] + ',' + "line" + ',' + this.coordParser(ann["pointA"].toString()) + ',' + this.coordParser(ann["pointB"].toString()) + ',' + '' + ',' + this.handleUndefined(ann["description"]) + ',' + this.handleUndefined(ann["properties"]) + ',' +  this.handleUndefined(ann["relatedSegments"]) + "\n";
+      } 
+      else if (ann["type"] === 2) {
+        csvString += ann["id"] + ',' + "axis aligned bounding box" + ',' + this.coordParser(ann["pointA"].toString()) + ',' + this.coordParser(ann["pointB"].toString()) + ',' + '' + ',' + this.handleUndefined(ann["description"]) + ',' + this.handleUndefined(ann["properties"]) + ',' +  this.handleUndefined(ann["relatedSegments"]) + "\n";
+      } 
+      else {
+        csvString += ann["id"] + ',' + "ellipsoid" + ',' + this.coordParser(ann["center"].toString()) + ',' + '' + ',' + this.coordParser(ann["radii"].toString()) + ',' + this.handleUndefined(ann["description"]) + ',' + this.handleUndefined(ann["properties"]) + ',' +  this.handleUndefined(ann["relatedSegments"]) + "\n";
+      }
+    }
+    
+
+    if (filepath) {
+      if (filepath.length < 4 || !(filepath.substring(filepath.length - 4) === ".csv")) {
+        filepath = filepath + ".csv";
+      }
+
+      const blob = new Blob([csvString],  { type: 'text/csv;charset=utf-8;'});
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filepath);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+
+  private handleUndefined(obj : any) {
+    if (obj === undefined) {
+      return "";
+    } else {
+      return this.coordParser(obj.toString());
+    }
+  }
+
+  private coordParser(coord : string) {
+    return "\""+ coord + "\"";
+  }
+
+  /* Handles user selected files to be imported. */
+  private async importFromCSV() {
+
+    console.log("in import");
+
+    let input = document.createElement('input');
+    input.type = 'file';
+    input.id = 'importCSVFileSelectmultipleKey';
+    input.accept = 'text/csv';
+    input.multiple = true;
+
+    
+    input.onchange = () => {
+      let files =  input.files;
+      
+      if (files != null) {
+        for (let file of files) {
+          this.parseCSV(file);
+        }
+      }
+    };
+
+    input.click();
+  }
+
+
+  /* Handles the annotations for each of the imported CSV files. Loops through the file and creates Annotation objects for each row. Then sends it to the AnnotationLayer source to be added to the overall state. */
+  private async parseCSV(file : File | null) {
+
+    if (!file) {
+      return;
+    }
+
+    const rawData = await this.betterPapa(file);
+
+
+    // if there are no annotations
+    if (rawData.data.length === 1) {
+      return;
+    }
+
+    let result = <Annotation[]>[];
+
+    for (let i = 1; i < rawData.data.length - 1; i++) {
+      // i starts at one to skip the first row
+
+      const ann = rawData.data[i];
+      const annType = ann[1];
+
+      // if the annotation is missing
+      if (ann.length === 1) {
+        continue;
+      }
+
+      /* CSV headers
+        0: ID
+        1: Type
+        2: Coordinate 1
+        3: Coordinate 2
+        4. Ellipsoid Radii
+        5: Description
+        6: Properties
+        7: Related Segments
+      */
+
+      let annotation : Annotation;
+
+      switch (annType) {
+      case('point'):
+        annotation = {
+          id: ann[0],
+          description: ann[5],
+          relatedSegments: ann[7] === "" ? [] : ann[7].split(","),
+          point: ann[2].split(",").map(Number),
+          type: AnnotationType.POINT,
+          properties: ann[6] === "" ? [] : ann[6].split(","),
+        };
+        result.push(annotation);
+
+        break;
+
+      case('line'):
+        annotation = {
+          id: ann[0],
+          description: ann[5],
+          relatedSegments: ann[7] === "" ? [] : ann[7].split(","),
+          pointA: ann[2].split(",").map(Number),
+          pointB: ann[3].split(",").map(Number),
+          type: AnnotationType.LINE,
+          properties: ann[6] === "" ? [] : ann[6].split(","),
+        };
+        result.push(annotation);
+        break;
+
+      case('axis aligned bounding box'):
+        annotation = {
+          id: ann[0],
+          description: ann[5],
+          relatedSegments: ann[7] === "" ? [] : ann[7].split(","),
+          pointA: ann[2].split(",").map(Number),
+          pointB: ann[3].split(",").map(Number),
+          type: AnnotationType.AXIS_ALIGNED_BOUNDING_BOX,
+          properties: ann[6] === "" ? [] : ann[6].split(","),
+        };
+        result.push(annotation);
+
+        break;
+
+      case('ellipsoid'):
+        annotation = {
+          id: ann[0],
+          description: ann[5],
+          relatedSegments: ann[7] === "" ? [] : ann[7].split(","),
+          center: ann[2].split(",").map(Number),
+          radii: ann[4].split(",").map(Number),
+          type: AnnotationType.ELLIPSOID,
+          properties: ann[6] === "" ? [] : ann[6].split(","),
+        };
+        result.push(annotation);
+
+        break;
+
+      default:
+        console.error(`No annotation of type ${annType}.`);
+
+      }
+    }
+
+    for (let j = 0; j < result.length; j++) {
+      try {
+        this.layer.localAnnotations.add(result[j]);
+      } catch (error) {
+        console.log(error);
+      }
+      
+    }
+  }
+
+  // directly from Seung: https://github.com/seung-lab/neuroglancer/blob/008c553a6cd2b5c9b6bd8bab0bb0236a6e01f554/src/neuroglancer/annotation/annotation_layer_view.ts#L1043
+  private betterPapa = (inputFile: File|Blob): Promise<any> => {
+    return new Promise((resolve) => {
+      Papa.parse(inputFile, {
+        complete: (results: any) => {
+          resolve(results);
+        }
+      });
+    });
   }
 }
 
