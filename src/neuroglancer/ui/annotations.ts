@@ -282,7 +282,7 @@ export class AnnotationLayerView extends Tab {
     this.element.classList.add('neuroglancer-annotation-layer-view');
     this.registerDisposer(this.visibility.changed.add(() => this.updateView()));
     this.registerDisposer(
-        layer.annotationStates.changed.add(() => this.updateAttachedAnnotationLayerStates()));
+        this.annotationStates.changed.add(() => this.updateAttachedAnnotationLayerStates()));
     this.headerRow.classList.add('neuroglancer-annotation-list-header');
 
     const toolbox = document.createElement('div');
@@ -654,6 +654,7 @@ export class AnnotationLayerView extends Tab {
     const chunkTransform = state.chunkTransform.value as ChunkTransformParameters;
     const element = document.createElement('div');
     element.classList.add('neuroglancer-annotation-list-entry');
+    element.dataset.color = state.displayState.color.toString();
     element.style.gridTemplateColumns = this.gridTemplate;
     const icon = document.createElement('div');
     icon.className = 'neuroglancer-annotation-icon';
@@ -1320,8 +1321,10 @@ export function UserLayerWithAnnotationsMixin<TBase extends {new (...args: any[]
 
       state.annotationId = mouseState.pickedAnnotationId;
       state.annotationType = mouseState.pickedAnnotationType;
-      state.annotationSerialized = new Uint8Array(
-          mouseState.pickedAnnotationBuffer!, mouseState.pickedAnnotationBufferOffset!);
+      state.annotationBuffer = new Uint8Array(
+        mouseState.pickedAnnotationBuffer!, mouseState.pickedAnnotationBufferBaseOffset!);
+      state.annotationIndex = mouseState.pickedAnnotationIndex!;
+      state.annotationCount = mouseState.pickedAnnotationCount!;
       state.annotationPartIndex = mouseState.pickedOffset;
       state.annotationSourceIndex = annotationLayer.sourceIndex;
       state.annotationSubsource = annotationLayer.subsourceId;
@@ -1332,6 +1335,7 @@ export function UserLayerWithAnnotationsMixin<TBase extends {new (...args: any[]
       if (state.annotationId === undefined) return false;
       const annotationLayer = this.annotationStates.states.find(
           x => x.sourceIndex === state.annotationSourceIndex &&
+               x.subsubsourceId === state.annotationSubsubsourceId &&
               (state.annotationSubsource === undefined ||
                x.subsourceId === state.annotationSubsource));
       if (annotationLayer === undefined) return false;
@@ -1349,22 +1353,26 @@ export function UserLayerWithAnnotationsMixin<TBase extends {new (...args: any[]
                     let statusText: string|undefined;
                     if (annotation == null) {
                       if (state.annotationType !== undefined &&
-                          state.annotationSerialized !== undefined) {
+                          state.annotationBuffer !== undefined) {
                         const handler = annotationTypeHandlers[state.annotationType];
                         const rank = annotationLayer.source.rank;
-                        const baseNumBytes = handler.serializedBytes(rank);
-                        const geometryOffset = state.annotationSerialized.byteOffset;
-                        const propertiesOffset = geometryOffset + baseNumBytes;
-                        const dataView = new DataView(state.annotationSerialized.buffer);
+                        const numGeometryBytes = handler.serializedBytes(rank);
+                        const baseOffset = state.annotationBuffer.byteOffset;
+                        const dataView = new DataView(state.annotationBuffer.buffer);
                         const isLittleEndian = Endianness.LITTLE === ENDIANNESS;
                         const {properties} = annotationLayer.source;
                         const annotationPropertySerializer =
-                            new AnnotationPropertySerializer(rank, properties);
-
+                          new AnnotationPropertySerializer(rank, numGeometryBytes, properties);
+                        const annotationIndex = state.annotationIndex!;
+                        const annotationCount = state.annotationCount!;
                         annotation = handler.deserialize(
-                            dataView, geometryOffset, isLittleEndian, rank, state.annotationId!);
+                            dataView,
+                            baseOffset +
+                                annotationPropertySerializer.propertyGroupBytes[0] *
+                                    annotationIndex,
+                            isLittleEndian, rank, state.annotationId!);
                         annotationPropertySerializer.deserialize(
-                            dataView, propertiesOffset, isLittleEndian,
+                            dataView, baseOffset, annotationIndex, annotationCount, isLittleEndian,
                             annotation.properties = new Array(properties.length));
                         if (annotationLayer.source.hasNonSerializedProperties()) {
                           statusText = 'Loading...';
@@ -1640,6 +1648,7 @@ export function UserLayerWithAnnotationsMixin<TBase extends {new (...args: any[]
         state.annotationId = id;
         state.annotationSourceIndex = annotationLayer.sourceIndex;
         state.annotationSubsource = annotationLayer.subsourceId;
+        state.annotationSubsubsourceId = annotationLayer.subsubsourceId;
         return true;
       }, pin);
     }

@@ -143,13 +143,17 @@ export interface SegmentationGroupState extends VisibleSegmentsState {
 export interface SegmentationColorGroupState {
   segmentColorHash: SegmentColorHash;
   segmentStatedColors: Uint64Map;
+  tempSegmentStatedColors2d: Uint64Map;
   segmentDefaultColor: WatchableValueInterface<vec3|undefined>;
+  tempSegmentDefaultColor2d: WatchableValueInterface<vec3|vec4|undefined>;
 }
 
 export interface SegmentationDisplayState {
   segmentSelectionState: SegmentSelectionState;
   saturation: TrackableAlphaValue;
+  hoverHighlight: WatchableValueInterface<boolean>;
   baseSegmentColoring: WatchableValueInterface<boolean>;
+  baseSegmentHighlighting: WatchableValueInterface<boolean>;
   segmentationGroupState: WatchableValueInterface<SegmentationGroupState>;
   segmentationColorGroupState: WatchableValueInterface<SegmentationColorGroupState>;
 
@@ -161,7 +165,11 @@ export interface SegmentationDisplayState {
   hideSegmentZero: WatchableValueInterface<boolean>;
   segmentColorHash: WatchableValueInterface<number>;
   segmentStatedColors: WatchableValueInterface<Uint64Map>;
+  tempSegmentStatedColors2d: WatchableValueInterface<Uint64Map>;
+  useTempSegmentStatedColors2d: WatchableValueInterface<boolean>;
   segmentDefaultColor: WatchableValueInterface<vec3|undefined>;
+  tempSegmentDefaultColor2d: WatchableValueInterface<vec3|vec4|undefined>;
+  highlightColor: WatchableValueInterface<vec4|undefined>;
 }
 
 export function resetTemporaryVisibleSegmentsState(state: VisibleSegmentsState) {
@@ -664,6 +672,7 @@ export function registerCallbackWhenSegmentationDisplayStateChanged(
   context.registerDisposer(displayState.saturation.changed.add(callback));
   context.registerDisposer(displayState.segmentSelectionState.changed.add(callback));
   context.registerDisposer(displayState.baseSegmentColoring.changed.add(callback));
+  context.registerDisposer(displayState.hoverHighlight.changed.add(callback));
 }
 
 export function registerRedrawWhenSegmentationDisplayStateChanged(
@@ -738,7 +747,8 @@ export function getObjectColor(
   color[3] = alpha;
   getBaseObjectColor(displayState, objectId, color);
   let saturation = displayState.saturation.value;
-  if (displayState.segmentSelectionState.isSelected(objectId)) {
+  if (displayState.hoverHighlight.value &&
+      displayState.segmentSelectionState.isSelected(objectId)) {
     if (saturation > 0.5) {
       saturation = saturation -= 0.5;
     } else {
@@ -768,6 +778,11 @@ export class SegmentationLayerSharedObject extends Base {
       public chunkManager: ChunkManager, public displayState: SegmentationDisplayState3D,
       chunkRenderLayer: LayerChunkProgressInfo) {
     super(chunkRenderLayer);
+    const segmentationGroupState = displayState.segmentationGroupState.value;
+    // Ensure that these properties remain valid as long as the layer does.
+    for (const property of VISIBLE_SEGMENTS_STATE_PROPERTIES) {
+      this.registerDisposer(segmentationGroupState[property].addRef());
+    }
   }
 
   initializeCounterpartWithChunkManager(options: any) {

@@ -120,6 +120,14 @@ class LayerSidePanel extends SidePanel {
     titleBar.classList.add('neuroglancer-layer-side-panel-title');
     titleBar.appendChild(this.registerDisposer(new LayerTypeWidget(layer)).element);
     titleBar.appendChild(this.registerDisposer(new LayerNameWidget(layer.managedLayer)).element);
+    this.registerDisposer(observeWatchable(visible => {
+      element.dataset.neuroglancerLayerVisible = visible.toString();
+    }, {
+      get value() {
+        return layer.managedLayer.visible;
+      },
+      changed: layer.managedLayer.layerChanged,
+    }));
     const pickButton = this.registerDisposer(new CheckboxIcon(
         {
           get value() {
@@ -180,10 +188,13 @@ class LayerSidePanel extends SidePanel {
           selectedTab: panelState.selectedTab,
           tabs: this.registerDisposer(new CachedWatchableValue({
             get value() {
-              return panelState.tabs.map(id => ({
-                                           id,
-                                           label: layer.tabs.options.get(id)!.label,
-                                         }));
+              return panelState.tabs.map(id => {
+                const {label, hidden} = layer.tabs.options.get(id)!;
+                return {
+                  id,
+                  label,
+                  hidden: hidden?.value || false,
+                }});
             },
             changed: panelState.tabsChanged,
           })),
