@@ -49,6 +49,9 @@ export class PrecomputedVolumeChunkSource extends
 class PrecomputedMeshSource extends
 (WithParameters(WithCredentialsProvider<SpecialProtocolCredentials>()(MeshSource), MeshSourceParameters)) {}
 
+class PrecomputedHierarchicalMeshSource extends
+(WithParameters(WithCredentialsProvider<SpecialProtocolCredentials>()(MeshSource), MeshSourceParameters)) {}
+
 class PrecomputedMultiscaleMeshSource extends
 (WithParameters(WithCredentialsProvider<SpecialProtocolCredentials>()(MultiscaleMeshSource), MultiscaleMeshSourceParameters)) {}
 
@@ -312,6 +315,12 @@ function getLegacyMeshSource(
   return chunkManager.getChunkSource(PrecomputedMeshSource, {parameters, credentialsProvider});
 }
 
+function getLegacyHierarchicalMeshSource(
+    chunkManager: ChunkManager, credentialsProvider: SpecialProtocolCredentialsProvider,
+    parameters: MeshSourceParameters) {
+  return chunkManager.getChunkSource(PrecomputedHierarchicalMeshSource, {parameters, credentialsProvider});
+}
+
 function parseTransform(data: any): mat4 {
   return verifyObjectProperty(data, 'transform', value => {
     const transform = mat4.create();
@@ -334,6 +343,17 @@ function parseMeshMetadata(data: any): ParsedMeshMetadata {
   let metadata: MultiscaleMeshMetadata|undefined;
   if (t === 'neuroglancer_legacy_mesh') {
     metadata = undefined;
+  } else if (t === 'neuroglancer_legacy_mesh_hierarchical') {
+    // hack in neuroglancer_legacy_mesh_hierarchical, using vertexQuantizationBits
+    // to specify the hierarchy size
+    const hierarchySize =
+        verifyObjectProperty(data, 'hierarchy_size', verifyPositiveInt);
+    const vertexQuantizationBits = hierarchySize;
+    const lodScaleMultiplier = 0.0;
+    // const transform = mat4.create();
+    const transform = parseTransform(data);
+    const sharding = undefined;
+    metadata = {lodScaleMultiplier, transform, sharding, vertexQuantizationBits};
   } else if (t !== 'neuroglancer_multilod_draco') {
     throw new Error(`Unsupported mesh type: ${JSON.stringify(t)}`);
   } else {
@@ -450,8 +470,18 @@ async function getMeshSource(
       segmentPropertyMap
     };
   }
-  let vertexPositionFormat: VertexPositionFormat;
   const {vertexQuantizationBits} = metadata;
+  if (vertexQuantizationBits > 100) {
+    // MDSeg: handling neuroglancer_legacy_mesh_hierarchical
+    console.log(metadata.transform);
+    return {
+      source: getLegacyHierarchicalMeshSource(chunkManager, credentialsProvider,
+                                              {url, lod: vertexQuantizationBits}),
+      transform: metadata.transform,
+      segmentPropertyMap
+    };
+  }
+  let vertexPositionFormat: VertexPositionFormat;
   if (vertexQuantizationBits === 10) {
     vertexPositionFormat = VertexPositionFormat.uint10;
   } else if (vertexQuantizationBits === 16) {
@@ -964,6 +994,7 @@ export class PrecomputedDataSource extends DataSourceProvider {
               return await getSkeletonsDataSource(options, credentialsProvider, url);
             case 'neuroglancer_multilod_draco':
             case 'neuroglancer_legacy_mesh':
+            case 'neuroglancer_legacy_mesh_hierarchical':
               return await getMeshDataSource(options, credentialsProvider, url);
             case 'neuroglancer_annotations_v1':
               return await getAnnotationDataSource(options, credentialsProvider, url, metadata);

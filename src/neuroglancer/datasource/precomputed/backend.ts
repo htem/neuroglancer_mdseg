@@ -349,6 +349,43 @@ export function decodeFragmentChunk(chunk: FragmentChunk, response: ArrayBuffer)
   }
 }
 
+@registerSharedObject() export class PrecomputedHierarchicalMeshSource extends
+(WithParameters(WithSharedCredentialsProviderCounterpart<SpecialProtocolCredentials>()(MeshSource), MeshSourceParameters)) {
+  download(chunk: ManifestChunk, _cancellationToken: CancellationToken) {
+    // No manifest chunk to download with the htem format.
+    chunk.fragmentIds = [''];
+    return Promise.resolve(undefined);
+  }
+
+  computeMeshPath(objectId: Uint64, hierarchySize: number): string {
+    if (hierarchySize < 1) {
+      throw new Error(`Invalid hierarchySize of ${hierarchySize}`)
+    }
+    const hierarchySize_ = BigInt(hierarchySize);
+    let objectId_ = BigInt(objectId.toString());
+    let prepends: BigInt[] = [];
+    while (objectId_ > hierarchySize_) {
+      prepends.push(objectId_ % hierarchySize_);
+      objectId_ = objectId_ / hierarchySize_;
+    }
+    let objectPath = `${prepends.length}/${objectId_}`;
+    for (let i = 0; i < prepends.length; i++) {
+      objectPath = `${objectPath}/${prepends[prepends.length-1-i]}`
+    }
+    return objectPath;
+  }
+
+  async downloadFragment(chunk: FragmentChunk, cancellationToken: CancellationToken) {
+    const {parameters} = this;
+    const hierarchySize = parameters.lod;
+    let meshPath = this.computeMeshPath(chunk.manifestChunk!.objectId, hierarchySize);
+    const response = await cancellableFetchSpecialOk(
+        this.credentialsProvider, `${parameters.url}/${meshPath}`, {},
+        responseArrayBuffer, cancellationToken);
+    decodeFragmentChunk(chunk, response);
+  }
+}
+
 interface PrecomputedMultiscaleManifestChunk extends MultiscaleManifestChunk {
   /**
    * Byte offsets into data file for each octree node.
