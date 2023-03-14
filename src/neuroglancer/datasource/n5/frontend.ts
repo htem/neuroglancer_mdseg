@@ -37,6 +37,7 @@ import {Borrowed} from 'neuroglancer/util/disposable';
 import {completeHttpPath} from 'neuroglancer/util/http_path_completion';
 import {isNotFoundError, parseUrl, responseJson} from 'neuroglancer/util/http_request';
 import {expectArray, parseArray, parseFixedLengthArray, verifyEnumString, verifyFinitePositiveFloat, verifyObject, verifyObjectProperty, verifyOptionalObjectProperty, verifyPositiveInt, verifyString, verifyStringArray} from 'neuroglancer/util/json';
+import {verifyInt} from 'neuroglancer/util/json';
 import {createHomogeneousScaleMatrix} from 'neuroglancer/util/matrix';
 import {getObjectId} from 'neuroglancer/util/object_id';
 import {scaleByExp10, unitFromJson} from 'neuroglancer/util/si_units';
@@ -109,8 +110,14 @@ export class MultiscaleVolumeChunkSource extends GenericMultiscaleVolumeChunkSou
     return transposeNestedArrays(
         (scales.filter(scale => scale !== undefined) as ScaleMetadata[]).map((scale, i) => {
           const scaleDownsamplingInfo = scalesDownsamplingInfo[i];
-          const transform =
+          let transform =
               createHomogeneousScaleMatrix(Float32Array, scaleDownsamplingInfo.downsamplingFactor);
+          if (scale.offset !== undefined && scale.resolution !== undefined) {
+            // correct offsets which can be different for individual scales
+            for (i = 0; i < scale.offset.length; i++) {
+              transform[12+i] = scale.offset[i]/scale.resolution[i]*scaleDownsamplingInfo.downsamplingFactor[i];
+            }
+          }
           return makeDefaultVolumeChunkSpecifications({
                    rank,
                    chunkToMultiscaleTransform: transform,
@@ -145,6 +152,8 @@ class ScaleMetadata {
   encoding: VolumeChunkEncoding;
   size: Float32Array;
   chunkSize: Uint32Array;
+  offset: Int32Array|undefined;
+  resolution: Uint32Array|undefined;
 
   constructor(obj: any) {
     verifyObject(obj);
@@ -153,6 +162,12 @@ class ScaleMetadata {
         verifyObjectProperty(obj, 'dimensions', x => parseArray(x, verifyPositiveInt)));
     this.chunkSize = verifyObjectProperty(
         obj, 'blockSize',
+        x => parseFixedLengthArray(new Uint32Array(this.size.length), x, verifyPositiveInt));
+    this.offset = verifyOptionalObjectProperty(
+        obj, 'offset',
+        x => parseFixedLengthArray(new Int32Array(this.size.length), x, verifyInt));
+    this.resolution = verifyOptionalObjectProperty(
+        obj, 'resolution',
         x => parseFixedLengthArray(new Uint32Array(this.size.length), x, verifyPositiveInt));
 
     let encoding: VolumeChunkEncoding|undefined;
