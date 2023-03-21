@@ -34,12 +34,18 @@ export class VolumeChunkSourceParameters {
   static RPC_ID = 'precomputed/VolumeChunkSource';
 }
 
-
 export class MeshSourceParameters {
   url: string;
   lod: number;
 
   static RPC_ID = 'precomputed/MeshSource';
+}
+
+export class HierarchicalMeshSourceParameters {
+  url: string;
+  hierarchySize: number;
+
+  static RPC_ID = 'precomputed/HierarchicalMeshSource';
 }
 
 export enum DataEncoding {

@@ -21,7 +21,7 @@ import {ChunkManager, WithParameters} from 'neuroglancer/chunk_manager/frontend'
 import {BoundingBox, CoordinateSpace, coordinateSpaceFromJson, emptyValidCoordinateSpace, makeCoordinateSpace, makeIdentityTransform, makeIdentityTransformedBoundingBox} from 'neuroglancer/coordinate_transform';
 import {WithCredentialsProvider} from 'neuroglancer/credentials_provider/chunk_source_frontend';
 import {CompleteUrlOptions, ConvertLegacyUrlOptions, DataSource, DataSourceProvider, DataSubsourceEntry, GetDataSourceOptions, NormalizeUrlOptions, RedirectError} from 'neuroglancer/datasource';
-import {AnnotationSourceParameters, AnnotationSpatialIndexSourceParameters, DataEncoding, IndexedSegmentPropertySourceParameters, MeshSourceParameters, MultiscaleMeshMetadata, MultiscaleMeshSourceParameters, ShardingHashFunction, ShardingParameters, SkeletonMetadata, SkeletonSourceParameters, VolumeChunkEncoding, VolumeChunkSourceParameters} from 'neuroglancer/datasource/precomputed/base';
+import {AnnotationSourceParameters, AnnotationSpatialIndexSourceParameters, DataEncoding, IndexedSegmentPropertySourceParameters, MeshSourceParameters, HierarchicalMeshSourceParameters, MultiscaleMeshMetadata, MultiscaleMeshSourceParameters, ShardingHashFunction, ShardingParameters, SkeletonMetadata, SkeletonSourceParameters, VolumeChunkEncoding, VolumeChunkSourceParameters} from 'neuroglancer/datasource/precomputed/base';
 import {VertexPositionFormat} from 'neuroglancer/mesh/base';
 import {MeshSource, MultiscaleMeshSource} from 'neuroglancer/mesh/frontend';
 import {IndexedSegmentPropertySource, InlineSegmentProperty, InlineSegmentPropertyMap, normalizeInlineSegmentPropertyMap, SegmentPropertyMap} from 'neuroglancer/segmentation_display_state/property_map';
@@ -50,7 +50,7 @@ class PrecomputedMeshSource extends
 (WithParameters(WithCredentialsProvider<SpecialProtocolCredentials>()(MeshSource), MeshSourceParameters)) {}
 
 class PrecomputedHierarchicalMeshSource extends
-(WithParameters(WithCredentialsProvider<SpecialProtocolCredentials>()(MeshSource), MeshSourceParameters)) {}
+(WithParameters(WithCredentialsProvider<SpecialProtocolCredentials>()(MeshSource), HierarchicalMeshSourceParameters)) {}
 
 class PrecomputedMultiscaleMeshSource extends
 (WithParameters(WithCredentialsProvider<SpecialProtocolCredentials>()(MultiscaleMeshSource), MultiscaleMeshSourceParameters)) {}
@@ -317,7 +317,7 @@ function getLegacyMeshSource(
 
 function getLegacyHierarchicalMeshSource(
     chunkManager: ChunkManager, credentialsProvider: SpecialProtocolCredentialsProvider,
-    parameters: MeshSourceParameters) {
+    parameters: HierarchicalMeshSourceParameters) {
   return chunkManager.getChunkSource(PrecomputedHierarchicalMeshSource, {parameters, credentialsProvider});
 }
 
@@ -350,7 +350,6 @@ function parseMeshMetadata(data: any): ParsedMeshMetadata {
         verifyObjectProperty(data, 'hierarchy_size', verifyPositiveInt);
     const vertexQuantizationBits = hierarchySize;
     const lodScaleMultiplier = 0.0;
-    // const transform = mat4.create();
     const transform = parseTransform(data);
     const sharding = undefined;
     metadata = {lodScaleMultiplier, transform, sharding, vertexQuantizationBits};
@@ -473,10 +472,10 @@ async function getMeshSource(
   const {vertexQuantizationBits} = metadata;
   if (vertexQuantizationBits > 100) {
     // MDSeg: handling neuroglancer_legacy_mesh_hierarchical
-    console.log(metadata.transform);
+    let hierarchySize = vertexQuantizationBits;  // hierarchySize is hacked in using `vertexQuantizationBits`
     return {
       source: getLegacyHierarchicalMeshSource(chunkManager, credentialsProvider,
-                                              {url, lod: vertexQuantizationBits}),
+                                              {url, hierarchySize: hierarchySize}),
       transform: metadata.transform,
       segmentPropertyMap
     };

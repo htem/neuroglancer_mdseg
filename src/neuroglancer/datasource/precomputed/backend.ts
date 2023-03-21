@@ -22,7 +22,7 @@ import {requestAsyncComputation} from 'neuroglancer/async_computation/request';
 import {Chunk, ChunkManager, WithParameters} from 'neuroglancer/chunk_manager/backend';
 import {GenericSharedDataSource} from 'neuroglancer/chunk_manager/generic_file_source';
 import {WithSharedCredentialsProviderCounterpart} from 'neuroglancer/credentials_provider/shared_counterpart';
-import {AnnotationSourceParameters, AnnotationSpatialIndexSourceParameters, DataEncoding, IndexedSegmentPropertySourceParameters, MeshSourceParameters, MultiscaleMeshSourceParameters, ShardingHashFunction, ShardingParameters, SkeletonSourceParameters, VolumeChunkEncoding, VolumeChunkSourceParameters} from 'neuroglancer/datasource/precomputed/base';
+import {AnnotationSourceParameters, AnnotationSpatialIndexSourceParameters, DataEncoding, IndexedSegmentPropertySourceParameters, MeshSourceParameters, HierarchicalMeshSourceParameters, MultiscaleMeshSourceParameters, ShardingHashFunction, ShardingParameters, SkeletonSourceParameters, VolumeChunkEncoding, VolumeChunkSourceParameters} from 'neuroglancer/datasource/precomputed/base';
 import {assignMeshFragmentData, assignMultiscaleMeshFragmentData, computeOctreeChildOffsets, decodeJsonManifestChunk, decodeTriangleVertexPositionsAndIndices, FragmentChunk, generateHigherOctreeLevel, ManifestChunk, MeshSource, MultiscaleFragmentChunk, MultiscaleManifestChunk, MultiscaleMeshSource} from 'neuroglancer/mesh/backend';
 import {IndexedSegmentPropertySourceBackend} from 'neuroglancer/segmentation_display_state/backend';
 import {SkeletonChunk, SkeletonSource} from 'neuroglancer/skeleton/backend';
@@ -350,7 +350,7 @@ export function decodeFragmentChunk(chunk: FragmentChunk, response: ArrayBuffer)
 }
 
 @registerSharedObject() export class PrecomputedHierarchicalMeshSource extends
-(WithParameters(WithSharedCredentialsProviderCounterpart<SpecialProtocolCredentials>()(MeshSource), MeshSourceParameters)) {
+(WithParameters(WithSharedCredentialsProviderCounterpart<SpecialProtocolCredentials>()(MeshSource), HierarchicalMeshSourceParameters)) {
   download(chunk: ManifestChunk, _cancellationToken: CancellationToken) {
     // No manifest chunk to download with the htem format.
     chunk.fragmentIds = [''];
@@ -377,8 +377,7 @@ export function decodeFragmentChunk(chunk: FragmentChunk, response: ArrayBuffer)
 
   async downloadFragment(chunk: FragmentChunk, cancellationToken: CancellationToken) {
     const {parameters} = this;
-    const hierarchySize = parameters.lod;
-    let meshPath = this.computeMeshPath(chunk.manifestChunk!.objectId, hierarchySize);
+    let meshPath = this.computeMeshPath(chunk.manifestChunk!.objectId, parameters.hierarchySize);
     const response = await cancellableFetchSpecialOk(
         this.credentialsProvider, `${parameters.url}/${meshPath}`, {},
         responseArrayBuffer, cancellationToken);
